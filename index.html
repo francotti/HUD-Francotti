@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0055">
+<meta name="build" content="2026-08-02-0056">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -381,8 +381,8 @@
       </svg>
     </div>
 
-    <!-- ============ COMPASS DIAL (optional) ============ -->
-    <div class="gauge gauge-med" id="compassGauge" style="display:none;">
+    <!-- ============ COMPASS DIAL (optional, shown by default) ============ -->
+    <div class="gauge gauge-med" id="compassGauge">
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="bezelChromeW" cx="50%" cy="50%" r="50%">
@@ -944,7 +944,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0055</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0056</div>
   </footer>
 </div>
 
@@ -1324,7 +1324,7 @@ const compassOffsetMinus = document.getElementById("compassOffsetMinus");
 const compassOffsetPlus  = document.getElementById("compassOffsetPlus");
 const compassOffsetValue = document.getElementById("compassOffsetValue");
 let compassActive = false, lastHeading = null, compassOffset = 0;
-let compassVisible = false;
+let compassVisible = true;
 
 function getScreenRotation() {
   if (screen.orientation && typeof screen.orientation.angle === "number") return screen.orientation.angle;
@@ -1400,7 +1400,12 @@ if (compassOffsetPlus) compassOffsetPlus.addEventListener("click", () => {
   compassOffset = Math.min(180, compassOffset + 90); saveCompassOffset(); updateCompassOffsetDisplay(); applyCompassRotation();
 });
 loadCompassOffset(); updateCompassOffsetDisplay();
-try { setCompassVisible(localStorage.getItem(COMPASS_VISIBLE_KEY) === "1"); } catch { setCompassVisible(false); }
+// Compass is ON by default now — only respect a saved "0" if the user
+// explicitly turned it off before; no saved value at all means show it.
+try {
+  const savedCompassVisible = localStorage.getItem(COMPASS_VISIBLE_KEY);
+  setCompassVisible(savedCompassVisible === null ? true : savedCompassVisible === "1");
+} catch { setCompassVisible(true); }
 
 /* =====================================================================
    GEOLOCATION — continuous watch (speed + position for speed-limit
