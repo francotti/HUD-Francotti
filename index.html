@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0007">
+<meta name="build" content="2026-08-02-0008">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -366,9 +366,45 @@
             <stop offset="70%" stop-color="#f2f2ee"/>
             <stop offset="100%" stop-color="#dedede"/>
           </radialGradient>
+          <!-- Same polished-chrome banding as the other bezels (bezelChromeS/W/F),
+               re-toned red instead of neutral silver/black. The gradient's stops
+               run from 76%-100% of a 196 radius (~149-196), which lines up almost
+               exactly with the visible red ring (150-196), so the plain white face
+               circle below simply covers the gradient's black centre. -->
+          <radialGradient id="bezelChromeR" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#2a0808"/>
+            <stop offset="81%"  stop-color="#d68888"/>
+            <stop offset="83%"  stop-color="#ffeaea"/>
+            <stop offset="85%"  stop-color="#5a1010"/>
+            <stop offset="87%"  stop-color="#f5cccc"/>
+            <stop offset="89%"  stop-color="#3a0a0a"/>
+            <stop offset="91%"  stop-color="#ffe6e6"/>
+            <stop offset="93%"  stop-color="#8a3030"/>
+            <stop offset="96%"  stop-color="#f5d0d0"/>
+            <stop offset="98%"  stop-color="#2a0a0a"/>
+            <stop offset="100%" stop-color="#100202"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenR" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,235,235,.55)"/>
+            <stop offset="32%"  stop-color="rgba(255,235,235,.05)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,60,60,.10)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <mask id="bezelRingR">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="150" fill="black"/>
+          </mask>
         </defs>
-        <circle cx="200" cy="200" r="196" fill="#0a0a0a"/>
-        <circle cx="200" cy="200" r="176" fill="#c62828"/>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeR)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenR)" mask="url(#bezelRingR)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
         <circle cx="200" cy="200" r="150" fill="url(#limitFace)"/>
         <text id="limitValue" x="200" y="200" text-anchor="middle" dominant-baseline="central"
               font-family="Futura, 'Century Gothic', sans-serif"
@@ -498,7 +534,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0007</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0008</div>
   </footer>
 </div>
 
