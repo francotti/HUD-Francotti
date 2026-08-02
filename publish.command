@@ -10,14 +10,14 @@ fi
 if git push; then
   echo ""
   echo "✓ Published. Live in ~30–60 s at:"
-  echo "  https://francotti.github.io/hud/"
+  echo "  https://francotti.github.io/hud-francotti/"
   echo "  (force-refresh iPhone Safari to bypass cache)"
 else
   echo ""
   echo "✗ Push failed — check the message above."
-  echo "  First time? Create the 'hud' repo on github.com under your"
-  echo "  account, then run once in Terminal:"
-  echo "    git remote add origin https://github.com/francotti/hud.git"
+  echo "  First time? Create the 'hud-francotti' repo on github.com under"
+  echo "  your account, then run once in Terminal:"
+  echo "    git remote add origin https://github.com/francotti/hud-francotti.git"
   echo "    git push -u origin main"
 fi
 echo ""

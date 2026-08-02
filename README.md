@@ -31,13 +31,13 @@ Dubbelklik `publish.command`. Eerste keer moet je zelf een lege GitHub-repo
 genaamd `hud` aanmaken onder je account en eenmalig koppelen:
 
 ```
-git remote add origin https://github.com/<jouw-account>/hud.git
+git remote add origin https://github.com/francotti/hud-francotti.git
 git push -u origin main
 ```
 
 Daarna is dubbelklikken op `publish.command` genoeg. Live op
-`https://<jouw-account>.github.io/hud/` zodra GitHub Pages aan staat voor
-de repo (Settings → Pages → Branch: main).
+`https://francotti.github.io/hud-francotti/` zodra GitHub Pages aan staat
+voor de repo (Settings → Pages → Branch: main).
 
 ## Op een (oude) iPhone gebruiken
 
