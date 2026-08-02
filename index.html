@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0061">
+<meta name="build" content="2026-08-02-0062">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -70,23 +70,39 @@
     .gauge.gauge-med{width:150px;height:150px;}
   }
   /* Phone landscape: speedometer on the left, the 4 small dials as a
-     2x2 square to its right — sized to fit an iPhone 13 mini's landscape
-     viewport (~812x375pt minus safe-area insets) in one screen. */
+     2x2 square to its right — sized with viewport-relative units (vh/vw)
+     so the cluster fills the screen edge-to-edge just like portrait does,
+     on any phone, not just an iPhone 13 mini's exact dimensions. --lg is
+     the shared "landscape gauge" size: the primary dial's diameter, and
+     the small-dial grid is derived from it so both columns end up the
+     exact same total height. */
   @media (orientation:landscape) and (max-height:500px){
-    .wrap{ padding:6px 10px 8px; gap:6px; }
+    .wrap{
+      --lg: min(90vh, 46vw);
+      padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
+               max(4px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+      gap:4px;
+      min-height:100vh; min-height:100dvh;
+      justify-content:center;
+    }
     header{ display:none; }
+    /* Footer normally just fades out (visibility:hidden) but still
+       reserves layout height — collapse it once hidden so the cluster
+       can actually claim the freed-up vertical space and fill the screen. */
+    body.footer-hidden footer{ max-height:0;margin:0;overflow:hidden; }
     .cluster{
       flex-wrap:nowrap; flex-direction:row;
-      align-items:center; justify-content:center; gap:14px;
+      align-items:center; justify-content:center; gap:3vw;
+      width:100%;
     }
-    .gauge{ width:230px;height:230px; }
+    .gauge{ width:var(--lg);height:var(--lg); }
     .small-dials{
       display:grid;
-      grid-template-columns:repeat(2,108px);
-      grid-template-rows:repeat(2,108px);
-      gap:8px;
+      grid-template-columns:repeat(2, calc(var(--lg)/2 - 5px));
+      grid-template-rows:repeat(2, calc(var(--lg)/2 - 5px));
+      gap:10px;
     }
-    .gauge.gauge-med{ width:108px;height:108px; }
+    .gauge.gauge-med{ width:calc(var(--lg)/2 - 5px);height:calc(var(--lg)/2 - 5px); }
   }
 
   .needle{
@@ -973,7 +989,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0061</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0062</div>
   </footer>
 </div>
 
