@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0016">
+<meta name="build" content="2026-08-02-0017">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -646,7 +646,7 @@
 
         <!-- Small thermometer glyph, same shape as the Jaeger temp dial's
              thermometer icon, scaled down. -->
-        <g transform="translate(200,180) scale(0.5)"
+        <g transform="translate(200,195) scale(0.65)"
            stroke="#e6ebed" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M -25,-7 L 14.25,-7 A 12,12 0 1 1 14.25,7 L -25,7 A 7,7 0 0 1 -25,-7 Z"/>
           <path d="M -11,0 L 20,0 A 4,4 0 1 1 27.46,2" fill="none" stroke-width="4.10"/>
@@ -711,7 +711,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0016</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0017</div>
   </footer>
 </div>
 
@@ -1143,7 +1143,13 @@ const WEATHER_FETCH_INTERVAL_MS = 10 * 60 * 1000;
    set as the speed dial (whole degrees only — the glyph set has no
    decimal point), with a small "°C" placed right after it. Both are
    positioned as one centred cluster at (200,140), the middle of the
-   dial's upper half. */
+   dial's upper half.
+   The frost gauge's on-screen box (.gauge-med) is smaller than the
+   speed gauge's, even though both SVGs share the same 400x400 viewBox,
+   so the digits need an extra scale-up to read as the same physical
+   size as the km dial's numerals — ratio taken from the CSS box sizes
+   (340/200 on desktop, 270/150 on mobile — both ~1.7). */
+const FROST_DIGIT_SCALE = 1.7;
 function renderFrostTemp(value) {
   while (frostDigitsEl.firstChild) frostDigitsEl.removeChild(frostDigitsEl.firstChild);
   const rounded = Math.round(value);
@@ -1154,11 +1160,12 @@ function renderFrostTemp(value) {
     offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
   }
   const totalW = offsets[offsets.length - 1];
+  const effTotalW = totalW * FROST_DIGIT_SCALE;
   const UNIT_GAP = 6, UNIT_W = 16;
-  const clusterW = totalW + UNIT_GAP + UNIT_W;
+  const clusterW = effTotalW + UNIT_GAP + UNIT_W;
   const startX = 200 - clusterW / 2;
-  const digitsCenterX = startX + totalW / 2;
-  frostDigitsEl.setAttribute("transform", `translate(${digitsCenterX} 140)`);
+  const digitsCenterX = startX + effTotalW / 2;
+  frostDigitsEl.setAttribute("transform", `translate(${digitsCenterX} 140) scale(${FROST_DIGIT_SCALE})`);
   chars.forEach((ch, idx) => {
     const gx = offsets[idx] - totalW / 2;
     frostDigitsEl.appendChild(el("path", {
@@ -1167,7 +1174,7 @@ function renderFrostTemp(value) {
       transform: `translate(${gx} 0)`
     }));
   });
-  frostUnitEl.setAttribute("x", startX + totalW + UNIT_GAP);
+  frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
 }
 
 async function maybeFetchWeather(lat, lon) {
