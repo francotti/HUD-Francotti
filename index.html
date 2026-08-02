@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0077">
+<meta name="build" content="2026-08-02-0078">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -57,32 +57,38 @@
     body{ padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
   }
 
-  /* Speedometer centred, the 4 small dials as a 2x2 grid beside it —
-     same arrangement on both Scherm 1 and Scherm 2, portrait and
-     landscape. DOM order inside .small-dials is compass, limit, limit2,
-     frost; since only one of limit/limit2 is ever visible (display:none
-     on the other), CSS grid auto-placement skips the hidden one
-     entirely, so the visible three always land: compass top-left, limit
-     top-right, frost bottom-left, bottom-right cell empty. --sg (shared
-     "speedo gauge" size) drives both the primary dial's diameter and the
-     small-dial grid, so the grid's total height always matches the
-     speedo's — sized with vh/vw so it fills the screen edge-to-edge on
-     any phone/orientation, not one fixed breakpoint. */
-  .wrap{ --sg: min(80vh, 42vw); }
+  /* Speedometer truly in the middle: compass (top) + frost (bottom)
+     stacked on the LEFT, speedo in its own centre column spanning both
+     rows, speedlimit on the RIGHT (bottom-right cell unused). Same
+     arrangement on both Scherm 1 and Scherm 2, portrait and landscape.
+     .small-dials stays display:contents (an invisible wrapper) so
+     compass/limit/limit2/frost become direct grid items of .cluster
+     itself, addressable by explicit grid-area. Only one of limit/limit2
+     is ever visible (display:none on the other) but both share the same
+     "limit" area, so whichever is shown lands in the right column. --sg
+     (speedo diameter) and --sm (small-dial diameter) are sized with
+     vh/vw so it fills the screen edge-to-edge on any phone/orientation,
+     not one fixed breakpoint. */
+  .wrap{ --sg: min(80vh, 42vw); --sm: calc(var(--sg)/2 - 5px); }
   .cluster{
-    display:flex; flex-wrap:nowrap; flex-direction:row;
-    align-items:center; justify-content:center; gap:3vw;
+    display:grid;
+    grid-template-columns: var(--sm) var(--sg) var(--sm);
+    grid-template-rows: var(--sm) var(--sm);
+    grid-template-areas:
+      "compass speedo limit"
+      "frost   speedo .";
+    align-items:center; justify-content:center;
+    gap:10px 3vw;
     width:100%;
   }
+  .small-dials{ display:contents; }
+  #speedGauge{ grid-area: speedo; }
+  #compassGauge{ grid-area: compass; }
+  #limitGauge, #limitGauge2{ grid-area: limit; }
+  #frostGauge{ grid-area: frost; }
   .gauge{ width:var(--sg); height:var(--sg); position:relative; }
   .gauge svg{width:100%;height:100%;display:block;}
-  .small-dials{
-    display:grid;
-    grid-template-columns:repeat(2, calc(var(--sg)/2 - 5px));
-    grid-template-rows:repeat(2, calc(var(--sg)/2 - 5px));
-    gap:10px;
-  }
-  .gauge.gauge-med{ width:calc(var(--sg)/2 - 5px); height:calc(var(--sg)/2 - 5px); }
+  .gauge.gauge-med{ width:var(--sm); height:var(--sm); }
 
   /* Phone landscape: more usable height than width, so --sg leans on vh
      harder, plus the safe-area padding/header-hide/footer-collapse needed
@@ -1060,7 +1066,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0077</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0078</div>
   </footer>
 </div>
 
