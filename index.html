@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0022">
+<meta name="build" content="2026-08-02-0023">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -745,6 +745,7 @@
       <span id="locMode"><span class="tag">LOC</span> — </span>
       <button class="btn-vintage btn-small" id="useLocBtn">USE LOCATION</button>
       <button class="btn-vintage btn-small" id="testRunBtn">TEST RUN</button>
+      <button class="btn-vintage btn-small" id="frostTestBtn">TEST FROST</button>
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
     </div>
@@ -753,7 +754,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0022</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0023</div>
   </footer>
 </div>
 
@@ -1236,6 +1237,21 @@ function renderFrostTemp(value) {
   frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
 }
 
+function applyFrostWarnClasses(t) {
+  const cold = t < COLD_WARN_BELOW;
+  const red  = t > RED_WARN_ABOVE;
+  const hot  = t > HOT_WARN_ABOVE && !red;
+  frostIcon.classList.toggle("frost-warn", cold);
+  frostBezelGlow.classList.toggle("cold-warn", cold);
+  frostBezelGlow.classList.toggle("hot-warn",  hot);
+  frostBezelGlow.classList.toggle("red-warn",  red);
+  frostDigitsEl.classList.toggle("cold-warn", cold);
+  frostDigitsEl.classList.toggle("hot-warn",  hot);
+  frostDigitsEl.classList.toggle("red-warn",  red);
+}
+
+let lastLiveFrostTemp = null;
+
 async function maybeFetchWeather(lat, lon) {
   const now = Date.now();
   if (now - lastWeatherFetch < WEATHER_FETCH_INTERVAL_MS) return;
@@ -1246,19 +1262,49 @@ async function maybeFetchWeather(lat, lon) {
     const j = await r.json();
     const t = j.current?.temperature_2m;
     if (typeof t !== "number") return;
+    lastLiveFrostTemp = t;
+    if (frostTestActive) return; // don't let a live fetch interrupt the test run
     renderFrostTemp(t);
-    const cold = t < COLD_WARN_BELOW;
-    const red  = t > RED_WARN_ABOVE;
-    const hot  = t > HOT_WARN_ABOVE && !red;
-    frostIcon.classList.toggle("frost-warn", cold);
-    frostBezelGlow.classList.toggle("cold-warn", cold);
-    frostBezelGlow.classList.toggle("hot-warn",  hot);
-    frostBezelGlow.classList.toggle("red-warn",  red);
-    frostDigitsEl.classList.toggle("cold-warn", cold);
-    frostDigitsEl.classList.toggle("hot-warn",  hot);
-    frostDigitsEl.classList.toggle("red-warn",  red);
+    applyFrostWarnClasses(t);
   } catch { /* keep last known reading */ }
 }
+
+/* ---------------------------------------------------------------------
+   TEST FROST — steps through the same temperatures/hold-time as the
+   Jaeger dashboard's temp-dial TEST RUN, driving the digits and the
+   cold/hot/red glow tiers instead of an analog needle. */
+const FROST_TEST_STEPS   = [-10, 0, 10, 20, 27, 30, 33, 40];
+const FROST_TEST_HOLD_MS = 3000;
+let frostTestActive = false, frostTestTimer = null;
+const frostTestBtn = document.getElementById("frostTestBtn");
+
+function stopFrostTest() {
+  frostTestActive = false;
+  clearTimeout(frostTestTimer);
+  frostTestTimer = null;
+  frostTestBtn.textContent = "TEST FROST";
+  if (typeof lastLiveFrostTemp === "number") {
+    renderFrostTemp(lastLiveFrostTemp);
+    applyFrostWarnClasses(lastLiveFrostTemp);
+  }
+}
+
+frostTestBtn.addEventListener("click", () => {
+  if (frostTestActive) { stopFrostTest(); return; }
+  frostTestActive = true;
+  frostTestBtn.textContent = "STOP TEST";
+  let i = 0;
+  const step = () => {
+    if (!frostTestActive) return;
+    if (i >= FROST_TEST_STEPS.length) { stopFrostTest(); return; }
+    const v = FROST_TEST_STEPS[i];
+    renderFrostTemp(v);
+    applyFrostWarnClasses(v);
+    i++;
+    frostTestTimer = setTimeout(step, FROST_TEST_HOLD_MS);
+  };
+  step();
+});
 
 /* =====================================================================
    NAVIGATION — Mapbox geocoding + directions (turn-by-turn MVP).
