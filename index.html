@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0014">
+<meta name="build" content="2026-08-02-0015">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -405,6 +405,17 @@
               <feFuncB type="linear" slope="1.52"/>
             </feComponentTransfer>
           </filter>
+          <linearGradient id="needleLeftW" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stop-color="#8a969b"/>
+            <stop offset="100%" stop-color="#c5ccce"/>
+          </linearGradient>
+          <linearGradient id="needleRightW" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stop-color="#eef1f3"/>
+            <stop offset="100%" stop-color="#bcc5c9"/>
+          </linearGradient>
+          <filter id="needleShadowW" x="-50%" y="-10%" width="200%" height="120%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.4"/>
+          </filter>
         </defs>
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeW)"/>
         <rect width="400" height="400" fill="url(#bezelSheenW)" mask="url(#bezelRingW)"/>
@@ -426,6 +437,19 @@
         <g id="compassFace">
           <g id="windTicks"></g>
           <g id="windLetters"></g>
+        </g>
+
+        <!-- FIXED compass arrow — points straight up, never rotates (the
+             compassFace card rotates underneath it). Drawn before the
+             louvre band so the waves cover its lower half, same trick
+             as the speed needle. -->
+        <g id="compassArrow">
+          <rect x="187" y="142" width="11" height="178" fill="#000" opacity="0.55" filter="url(#needleShadowW)"/>
+          <rect x="194" y="140" width="12" height="180" fill="#b8c2c6"/>
+          <polygon points="194,140 200,140 200,320 194,320" fill="url(#needleLeftW)"/>
+          <polygon points="200,140 206,140 206,320 200,320" fill="url(#needleRightW)"/>
+          <line x1="200" y1="140" x2="200" y2="320" stroke="#f5f8fa" stroke-width="0.5" opacity="0.9"/>
+          <rect x="194" y="140" width="12" height="180" fill="none" stroke="#2c2210" stroke-width=".4"/>
         </g>
 
         <!-- Wave/louvre band, fixed (outside the rotating compassFace group)
@@ -674,7 +698,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0014</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0015</div>
   </footer>
 </div>
 
