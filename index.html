@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0034">
+<meta name="build" content="2026-08-02-0035">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -913,6 +913,7 @@
       <span id="locMode"><span class="tag">LOC</span> — </span>
       <button class="btn-vintage btn-small" id="useLocBtn">USE LOCATION</button>
       <button class="btn-vintage btn-small" id="testRunBtn">TEST RUN</button>
+      <button class="btn-vintage btn-small" id="speedWarnTestBtn">TEST LIMIT WARN</button>
       <button class="btn-vintage btn-small" id="frostTestBtn">TEST FROST</button>
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
@@ -922,7 +923,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0034</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0035</div>
   </footer>
 </div>
 
@@ -1130,6 +1131,45 @@ testRunBtn.addEventListener("click", () => {
   step();
 });
 
+/* ---------------- TEST LIMIT WARN — exercises the 3-tier over-limit
+   glow/siren against a fixed 30 km/h limit: under, at, <5 over (amber),
+   >=5 over (red), and >30 over (siren + background). ---------------- */
+const SPEEDWARN_TEST_STEPS   = [0, 30, 31, 34, 35, 50, 60, 80];
+const SPEEDWARN_TEST_LIMIT   = 30;
+const SPEEDWARN_TEST_HOLD_MS = 2000;
+let speedWarnTestActive = false, speedWarnTestTimer = null;
+let savedLimitBeforeWarnTest = null;
+const speedWarnTestBtn = document.getElementById("speedWarnTestBtn");
+
+function stopSpeedWarnTest() {
+  speedWarnTestActive = false;
+  clearTimeout(speedWarnTestTimer);
+  speedWarnTestTimer = null;
+  speedWarnTestBtn.textContent = "TEST LIMIT WARN";
+  currentLimit = savedLimitBeforeWarnTest;
+  setLimitValueText(typeof currentLimit === "number" ? String(currentLimit) : "--");
+  pointSpeedTo(lastSpeedKmh ?? 0, { suppressWarn: false });
+  speedDigital.textContent = "";
+}
+
+speedWarnTestBtn.addEventListener("click", () => {
+  if (speedWarnTestActive) { stopSpeedWarnTest(); return; }
+  speedWarnTestActive = true;
+  speedWarnTestBtn.textContent = "STOP TEST";
+  savedLimitBeforeWarnTest = currentLimit;
+  currentLimit = SPEEDWARN_TEST_LIMIT;
+  setLimitValueText(String(SPEEDWARN_TEST_LIMIT));
+  let i = 0;
+  const step = () => {
+    if (!speedWarnTestActive) return;
+    if (i >= SPEEDWARN_TEST_STEPS.length) { stopSpeedWarnTest(); return; }
+    pointSpeedTo(SPEEDWARN_TEST_STEPS[i], { showDigital: true });
+    i++;
+    speedWarnTestTimer = setTimeout(step, SPEEDWARN_TEST_HOLD_MS);
+  };
+  step();
+});
+
 /* =====================================================================
    COMPASS DIAL — identical mechanics to Jaeger (kept optional / off
    by default; toggled with the COMPASS ON/OFF button).
@@ -1291,7 +1331,7 @@ function onPosition(p) {
   lastPos = { lat, lon, t };
   if (typeof kmh === "number" && isFinite(kmh)) {
     lastSpeedKmh = kmh;
-    if (!testRunActive) pointSpeedTo(kmh);
+    if (!testRunActive && !speedWarnTestActive) pointSpeedTo(kmh);
   }
   setLocMode(`${lat.toFixed(4)}°, ${lon.toFixed(4)}°`);
   maybeFetchSpeedLimit(lat, lon);
@@ -1389,6 +1429,7 @@ async function fetchMaxspeedAt(lat, lon) {
 }
 
 async function maybeFetchSpeedLimit(lat, lon) {
+  if (speedWarnTestActive) return; // don't let a live fetch override the fixed 30 km/h test limit
   const now = Date.now();
   if (now - lastLimitFetch < LIMIT_FETCH_INTERVAL_MS) return;
   lastLimitFetch = now;
