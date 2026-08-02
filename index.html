@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0063">
+<meta name="build" content="2026-08-02-0064">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -114,6 +114,15 @@
   #limitGauge2{ display:none; }
   body.mode-screen2 #limitGauge{ display:none; }
   body.mode-screen2 #limitGauge2{ display:block; }
+
+  /* Scherm 2's speedometer: the tick scale + needle are swapped for one
+     big digital number. Ring (speed-bezel-glow), background/wave-band
+     glow, wave band itself and the Jaeger logo are untouched. */
+  #speedBigDigits{ display:none; }
+  body.mode-screen2 #speedTicks,
+  body.mode-screen2 #speedNumerals,
+  body.mode-screen2 #speedNeedle{ display:none; }
+  body.mode-screen2 #speedBigDigits{ display:block; }
 
   /* Mirror mode — for mounting the phone in a windshield HUD reflector
      (a glass/mirror combiner): flips the whole dial cluster horizontally,
@@ -408,6 +417,11 @@
              (50% larger), coloured to match the current glow tier. Sits
              lower-right, between the numeral ring and the wave band. -->
         <g id="speedWarnDigits"></g>
+
+        <!-- SCHERM 2 only: one big white digital speed readout, hand-drawn
+             glyph font (same as the other digit displays), replacing the
+             tick scale + needle. Ring, wave band, logo stay untouched. -->
+        <g id="speedBigDigits"></g>
 
         <g id="speedNeedle" class="needle">
           <rect x="187" y="142" width="11" height="139" fill="#000" opacity="0.65" filter="url(#needleShadowS)"/>
@@ -1009,7 +1023,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0063</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0064</div>
   </footer>
 </div>
 
@@ -1119,6 +1133,32 @@ const speedBezelGlow = document.getElementById("speedBezelGlow");
 const speedBgGlowRed = document.getElementById("speedBgGlowRed");
 const speedLouverGlowRed = document.getElementById("speedLouverGlowRed");
 const speedWarnDigitsEl = document.getElementById("speedWarnDigits");
+const speedBigDigitsEl  = document.getElementById("speedBigDigits");
+
+// Scherm 2's big digital speedo readout — same hand-drawn glyph font as
+// the tick numerals/limit sign, always kept up to date (even while
+// hidden on Scherm 1) so it's instantly correct the moment SCHERM 2 is
+// toggled on. Plain white, no warning-tier colouring (the ring already
+// carries that signal).
+function renderSpeedBigDigits(value) {
+  while (speedBigDigitsEl.firstChild) speedBigDigitsEl.removeChild(speedBigDigitsEl.firstChild);
+  const chars = String(Math.round(Math.max(0, value))).split("");
+  const offsets = [0];
+  for (let k = 1; k < chars.length; k++) {
+    const narrow = chars[k] === "1" || chars[k-1] === "1";
+    offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
+  }
+  const totalW = offsets[offsets.length - 1];
+  chars.forEach((ch, idx) => {
+    const gx = offsets[idx] - totalW / 2;
+    speedBigDigitsEl.appendChild(el("path", {
+      d: GLYPH[ch], fill: "none", stroke: "#ffffff",
+      "stroke-width": GLYPH_STROKE, "stroke-linecap": "round", "stroke-linejoin": "round",
+      transform: `translate(${gx} 0)`
+    }));
+  });
+  speedBigDigitsEl.setAttribute("transform", "translate(200 206) scale(2.4)");
+}
 
 /* Needle-red-glow and ring-red-glow are driven by ONE shared JS clock
    instead of two separate CSS animations. Two independent CSS
@@ -1259,6 +1299,7 @@ document.addEventListener("touchstart", unlockSirenAudio, { once: true, passive:
 function pointSpeedTo(v, opts = {}) {
   const clamped = Math.max(SPEED_MIN, Math.min(SPEED_MAX, v));
   speedNeedle.style.transform = `rotate(${speedAngle(clamped)}deg)`;
+  renderSpeedBigDigits(clamped);
   const suppress = !!opts.suppressWarn;
   const delta = typeof currentLimit === "number" ? v - currentLimit : null;
   // 0-5 over: amber (needle + digit readout only).
