@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0071">
+<meta name="build" content="2026-08-02-0072">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1039,7 +1039,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0071</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0072</div>
   </footer>
 </div>
 
@@ -1844,9 +1844,8 @@ function renderFrostTemp(value) {
   let digitsCenterX, centerY;
   if (screen2) {
     digitsCenterX = 200;
-    // Shifted up from the true midpoint (184) — at 2x scale the digit's
-    // bottom edge touched the wave band (starts ~228).
-    centerY = 172;
+    // Shifted up further per request (was 184, then 172).
+    centerY = 160;
   } else {
     const UNIT_GAP = 18, UNIT_W = 24;
     const clusterW = effTotalW + UNIT_GAP + UNIT_W;
