@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0052">
+<meta name="build" content="2026-08-02-0053">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -97,10 +97,11 @@
   .needle.hot-warn .needle-hot-glow{ animation: pulseGlow 2.8s ease-in-out infinite; }
   .speed-bezel-glow-hot, .speed-bezel-glow-red{opacity:0;pointer-events:none;}
   .speed-bezel-glow.hot-warn .speed-bezel-glow-hot{ animation: pulseGlow 2.8s ease-in-out infinite; }
+  /* Background + wave-band glow are also driven from the same shared JS
+     clock as the needle/ring (see setSpeedGlowState below), so the
+     whole extreme-tier escalation — ring, background, wave band —
+     pulses in the exact same rhythm as the needle. */
   .speed-bg-glow-red, .speed-louver-glow-red{opacity:0;pointer-events:none;}
-  .speed-bg-glow-red.siren-warn, .speed-louver-glow-red.siren-warn{
-    animation: pulseGlow 1s ease-in-out infinite;
-  }
 
   .frost-glow, .heat-glow{opacity:0;pointer-events:none;}
   .frost-icon.frost-warn .frost-glow{ animation: pulseGlow 3s ease-in-out infinite; }
@@ -938,7 +939,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0052</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0053</div>
   </footer>
 </div>
 
@@ -1066,6 +1067,11 @@ function speedGlowTick(now) {
   const opacity = 0.425 * (1 - Math.cos((t / SPEED_GLOW_PERIOD_MS) * Math.PI * 2));
   if (speedNeedleRedGlowEl) speedNeedleRedGlowEl.style.opacity = speedNeedleGlowing ? opacity : 0;
   if (speedBezelRedGlowEl)  speedBezelRedGlowEl.style.opacity  = speedRingGlowing  ? opacity : 0;
+  // Background + wave band always accompany the ring (same "extreme"
+  // condition) — driven from this same clock so the whole dial pulses
+  // in the identical rhythm as the needle and ring.
+  if (speedBgGlowRed)     speedBgGlowRed.style.opacity     = speedRingGlowing ? opacity : 0;
+  if (speedLouverGlowRed) speedLouverGlowRed.style.opacity = speedRingGlowing ? opacity : 0;
   if (speedNeedleGlowing || speedRingGlowing) {
     speedGlowRafId = requestAnimationFrame(speedGlowTick);
   } else {
@@ -1081,6 +1087,8 @@ function setSpeedGlowState(needleOn, ringOn) {
   } else if (!needleOn && !ringOn) {
     if (speedNeedleRedGlowEl) speedNeedleRedGlowEl.style.opacity = 0;
     if (speedBezelRedGlowEl)  speedBezelRedGlowEl.style.opacity = 0;
+    if (speedBgGlowRed)       speedBgGlowRed.style.opacity = 0;
+    if (speedLouverGlowRed)   speedLouverGlowRed.style.opacity = 0;
   }
 }
 
@@ -1179,8 +1187,6 @@ function pointSpeedTo(v, opts = {}) {
   const extreme = !suppress && delta !== null && delta >= 30;
   speedNeedle.classList.toggle("hot-warn", hot);
   setSpeedGlowState(red, extreme);
-  speedBgGlowRed.classList.toggle("siren-warn", extreme);
-  speedLouverGlowRed.classList.toggle("siren-warn", extreme);
   if (extreme) startSiren(); else stopSiren();
   if (red) renderSpeedWarnDigits(v, "#d64545");
   else if (hot) renderSpeedWarnDigits(v, "#ffb347");
