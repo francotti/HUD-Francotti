@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0065">
+<meta name="build" content="2026-08-02-0066">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1026,7 +1026,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0065</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0066</div>
   </footer>
 </div>
 
@@ -1160,10 +1160,9 @@ function renderSpeedBigDigits(value) {
       transform: `translate(${gx} 0)`
     }));
   });
-  // Centered between the wave band (starts ~228) and the open top of the
-  // dial face (~140, where the ticks/needle used to start) => y=184.
-  // Scale 6.0 = the previous 2.4 x 2.5, per request.
-  speedBigDigitsEl.setAttribute("transform", "translate(200 184) scale(6)");
+  // Shifted up from y=184 — at scale 6 the digit height (~100) meant the
+  // bottom edge dipped behind the wave band (starts ~228). y=170 clears it.
+  speedBigDigitsEl.setAttribute("transform", "translate(200 170) scale(6)");
 }
 
 /* Needle-red-glow and ring-red-glow are driven by ONE shared JS clock
