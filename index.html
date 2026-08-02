@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0035">
+<meta name="build" content="2026-08-02-0036">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -923,7 +923,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0035</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0036</div>
   </footer>
 </div>
 
@@ -1136,7 +1136,7 @@ testRunBtn.addEventListener("click", () => {
    >=5 over (red), and >30 over (siren + background). ---------------- */
 const SPEEDWARN_TEST_STEPS   = [0, 30, 31, 34, 35, 50, 60, 80];
 const SPEEDWARN_TEST_LIMIT   = 30;
-const SPEEDWARN_TEST_HOLD_MS = 2000;
+const SPEEDWARN_TEST_HOLD_MS = 4000;
 let speedWarnTestActive = false, speedWarnTestTimer = null;
 let savedLimitBeforeWarnTest = null;
 const speedWarnTestBtn = document.getElementById("speedWarnTestBtn");
