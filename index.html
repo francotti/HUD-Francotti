@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0028">
+<meta name="build" content="2026-08-02-0029">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -638,11 +638,10 @@
         <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
 
-        <!-- Limit readout, bright red digits directly on the dark
-             background (white sign face removed). -->
-        <text id="limitValue" x="200" y="168" text-anchor="middle" dominant-baseline="central"
-              font-family="Futura, 'Century Gothic', sans-serif"
-              font-size="80" font-weight="700" fill="#d63b3b">--</text>
+        <!-- Limit readout, same hand-drawn vintage-gauge digit set as the
+             speedometer (filled in by renderLimitDigits() below), directly
+             on the dark background. -->
+        <g id="limitValue"></g>
 
         <!-- Wave/louvre band, drawn after the sign face so it covers the
              lower edge, same convention as the other dials. -->
@@ -923,7 +922,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0028</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0029</div>
   </footer>
 </div>
 
@@ -1318,10 +1317,43 @@ startWatch();
 ===================================================================== */
 const limitValueEl = document.getElementById("limitValue");
 const limitValueEl2 = document.getElementById("limitValue2");
-// Keeps the exact-copy sign (for a future HUD variant) mirroring the
-// same live value as the original, everywhere the original updates.
+// Same gauge-med vs primary-gauge size ratio as the frost gauge's digits,
+// so the hand-drawn glyphs read at the same physical size as the
+// speedometer's numerals.
+const LIMIT_DIGIT_SCALE = 1.7;
+function renderLimitDigits(text) {
+  while (limitValueEl.firstChild) limitValueEl.removeChild(limitValueEl.firstChild);
+  if (text === "∞") {
+    // The hand-drawn digit set has no infinity glyph — fall back to text.
+    limitValueEl.appendChild(el("text", {
+      x: 0, y: 0, "text-anchor": "middle", "dominant-baseline": "central",
+      "font-family": "Futura, 'Century Gothic', sans-serif",
+      "font-size": 80, "font-weight": 700, fill: "#d63b3b"
+    }, "∞"));
+    limitValueEl.setAttribute("transform", "translate(200 168)");
+    return;
+  }
+  const chars = text.split("");
+  const offsets = [0];
+  for (let k = 1; k < chars.length; k++) {
+    const narrow = chars[k] === "1" || chars[k-1] === "1" || chars[k] === "-" || chars[k-1] === "-";
+    offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
+  }
+  const totalW = offsets[offsets.length - 1];
+  chars.forEach((ch, idx) => {
+    const gx = offsets[idx] - totalW / 2;
+    limitValueEl.appendChild(el("path", {
+      d: GLYPH[ch], fill: "none", stroke: "#d63b3b",
+      "stroke-width": GLYPH_STROKE, "stroke-linecap": "round", "stroke-linejoin": "round",
+      transform: `translate(${gx} 0)`
+    }));
+  });
+  limitValueEl.setAttribute("transform", `translate(200 168) scale(${LIMIT_DIGIT_SCALE})`);
+}
+// Keeps the exact-copy sign (for a future HUD variant) as plain text,
+// mirroring the same live value as the original, everywhere it updates.
 function setLimitValueText(text) {
-  limitValueEl.textContent = text;
+  renderLimitDigits(text);
   if (limitValueEl2) limitValueEl2.textContent = text;
 }
 let lastLimitFetch = 0;
