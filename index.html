@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0059">
+<meta name="build" content="2026-08-02-0060">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -944,7 +944,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0059</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0060</div>
   </footer>
 </div>
 
@@ -1465,8 +1465,20 @@ function startWatch() {
   });
 }
 useLocBtn.addEventListener("click", () => { setStatus("— LOCATIE AANVRAGEN —"); startWatch(); });
-// Auto-start on load (works everywhere except iOS, which needs the tap above).
-startWatch();
+// Auto-start on load — EXCEPT in iOS standalone (Add to Home Screen)
+// mode. iOS silently denies a geolocation request that isn't triggered
+// by a genuine tap when running standalone, and — worse — remembers
+// that denial for good. So in standalone mode we wait for the user's
+// first tap on USE LOCATION (or anywhere, via the listener below)
+// instead of ever auto-requesting, which is what caused it to get
+// stuck on DENIED for PWA installs.
+if (document.body.classList.contains("ios-standalone")) {
+  setStatus("— TIK OM LOCATIE TE ACTIVEREN —");
+  document.addEventListener("click", startWatch, { once: true });
+  document.addEventListener("touchstart", startWatch, { once: true, passive: true });
+} else {
+  startWatch();
+}
 
 /* =====================================================================
    SPEED LIMIT — OpenStreetMap Overpass nearest-road lookup, throttled
