@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0068">
+<meta name="build" content="2026-08-02-0069">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -126,6 +126,13 @@
   body.mode-screen2 #speedMicroPrint,
   body.mode-screen2 #speedWarnDigits{ display:none; }
   body.mode-screen2 #speedBigDigits{ display:block; }
+
+  /* Scherm 2's frost gauge: drop the °C unit, thermometer icon, snowflake
+     and sun telltales — just the (now much bigger, recentered) number. */
+  body.mode-screen2 #frostUnit,
+  body.mode-screen2 #frostThermoIcon,
+  body.mode-screen2 #frostIcon,
+  body.mode-screen2 #heatIcon{ display:none; }
   /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
      than the ring/needle's pulse (2.8s) since this one is meant to read
      as "slowly" per request. */
@@ -944,7 +951,7 @@
 
         <!-- Small thermometer glyph, same shape as the Jaeger temp dial's
              thermometer icon, scaled down. -->
-        <g transform="translate(200,195) scale(0.65)"
+        <g id="frostThermoIcon" transform="translate(200,195) scale(0.65)"
            stroke="#e6ebed" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M -25,-7 L 14.25,-7 A 12,12 0 1 1 14.25,7 L -25,7 A 7,7 0 0 1 -25,-7 Z"/>
           <path d="M -11,0 L 20,0 A 4,4 0 1 1 27.46,2" fill="none" stroke-width="4.10"/>
@@ -1032,7 +1039,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0068</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0069</div>
   </footer>
 </div>
 
@@ -1550,10 +1557,18 @@ try {
 ===================================================================== */
 const SCREEN2_KEY = "hud.screen2";
 const MIRROR_KEY  = "hud.mirror";
+// Declared here (not down by renderFrostTemp/maybeFetchWeather) because
+// setScreen2 below reads it immediately at boot, before this script
+// reaches its "natural" spot further down — a `let` referenced before
+// its own declaration line throws (temporal dead zone), even via typeof.
+let lastLiveFrostTemp = null;
 function setScreen2(v) {
   document.body.classList.toggle("mode-screen2", v);
   screen2Btn.textContent = v ? "SCHERM 1" : "SCHERM 2";
   try { localStorage.setItem(SCREEN2_KEY, v ? "1" : "0"); } catch {}
+  // Frost digit's position/scale depends on the mode — force a re-render
+  // so it updates immediately instead of waiting for the next weather tick.
+  if (typeof lastLiveFrostTemp === "number") renderFrostTemp(lastLiveFrostTemp);
 }
 function setMirror(v) {
   document.body.classList.toggle("mirror-on", v);
@@ -1820,11 +1835,24 @@ function renderFrostTemp(value) {
     offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
   }
   const totalW = offsets[offsets.length - 1];
-  const effTotalW = totalW * FROST_DIGIT_SCALE;
-  const UNIT_GAP = 18, UNIT_W = 24;
-  const clusterW = effTotalW + UNIT_GAP + UNIT_W;
-  const startX = 200 - clusterW / 2 + FROST_DIGIT_SHIFT;
-  const digitsCenterX = startX + effTotalW / 2;
+  const screen2 = document.body.classList.contains("mode-screen2");
+  // Scherm 2: no unit label to balance against, so just centre on the
+  // dial, twice as big, and vertically centred between the wave band
+  // (starts ~228) and the open top of the face (~140) => y=184.
+  const scale = screen2 ? FROST_DIGIT_SCALE * 2 : FROST_DIGIT_SCALE;
+  const effTotalW = totalW * scale;
+  let digitsCenterX, centerY;
+  if (screen2) {
+    digitsCenterX = 200;
+    centerY = 184;
+  } else {
+    const UNIT_GAP = 18, UNIT_W = 24;
+    const clusterW = effTotalW + UNIT_GAP + UNIT_W;
+    const startX = 200 - clusterW / 2 + FROST_DIGIT_SHIFT;
+    digitsCenterX = startX + effTotalW / 2;
+    centerY = 140;
+    frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
+  }
 
   function digitGroup(cls, stroke, strokeW, filterAttr) {
     const g = el("g", filterAttr ? { class: cls, filter: filterAttr } : { class: cls });
@@ -1839,14 +1867,12 @@ function renderFrostTemp(value) {
     return g;
   }
 
-  const wrapper = el("g", { transform: `translate(${digitsCenterX} 140) scale(${FROST_DIGIT_SCALE})` });
+  const wrapper = el("g", { transform: `translate(${digitsCenterX} ${centerY}) scale(${scale})` });
   wrapper.appendChild(digitGroup("frost-digit-glow-cold", "#4a90e2", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
   wrapper.appendChild(digitGroup("frost-digit-glow-hot",  "#ffb347", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
   wrapper.appendChild(digitGroup("frost-digit-glow-red",  "#d64545", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
   wrapper.appendChild(digitGroup("frost-digit-crisp",     "#d8dfe1", GLYPH_STROKE, null));
   frostDigitsEl.appendChild(wrapper);
-
-  frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
 }
 
 function applyFrostWarnClasses(t) {
@@ -1861,8 +1887,6 @@ function applyFrostWarnClasses(t) {
   frostDigitsEl.classList.toggle("hot-warn",  hot);
   frostDigitsEl.classList.toggle("red-warn",  red);
 }
-
-let lastLiveFrostTemp = null;
 
 async function maybeFetchWeather(lat, lon) {
   const now = Date.now();
