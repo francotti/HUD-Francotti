@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0044">
+<meta name="build" content="2026-08-02-0045">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -929,7 +929,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0044</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0045</div>
   </footer>
 </div>
 
@@ -1418,14 +1418,14 @@ const limitValueEl2 = document.getElementById("limitValue2");
 const LIMIT_DIGIT_SCALE = 3.4;
 // Shared renderer for both signs' readouts — same hand-drawn glyph font
 // as the other dials, just a different colour/anchor per sign.
-function renderLimitDigitsInto(targetEl, text, color, y) {
+function renderLimitDigitsInto(targetEl, text, color, y, scale) {
   while (targetEl.firstChild) targetEl.removeChild(targetEl.firstChild);
   if (text === "∞") {
     // The hand-drawn digit set has no infinity glyph — fall back to text.
     targetEl.appendChild(el("text", {
       x: 0, y: 0, "text-anchor": "middle", "dominant-baseline": "central",
       "font-family": "Futura, 'Century Gothic', sans-serif",
-      "font-size": 80, "font-weight": 700, fill: color
+      "font-size": 80 * (scale / LIMIT_DIGIT_SCALE), "font-weight": 700, fill: color
     }, "∞"));
     targetEl.setAttribute("transform", `translate(200 ${y})`);
     return;
@@ -1445,16 +1445,18 @@ function renderLimitDigitsInto(targetEl, text, color, y) {
       transform: `translate(${gx} 0)`
     }));
   });
-  targetEl.setAttribute("transform", `translate(200 ${y}) scale(${LIMIT_DIGIT_SCALE})`);
+  targetEl.setAttribute("transform", `translate(200 ${y}) scale(${scale})`);
 }
 function renderLimitDigits(text) {
-  renderLimitDigitsInto(limitValueEl, text, "#d63b3b", 148);
+  renderLimitDigitsInto(limitValueEl, text, "#d63b3b", 148, LIMIT_DIGIT_SCALE);
 }
 // Keeps the exact-copy sign (for a future HUD variant) in the same
 // hand-drawn glyph font, dark on its white face, mirroring the same
-// live value as the original everywhere it updates.
+// live value as the original everywhere it updates. Numbers here are
+// 2x the original's size per request.
+const LIMIT_DIGIT_SCALE_2 = LIMIT_DIGIT_SCALE * 2;
 function renderLimitDigits2(text) {
-  if (limitValueEl2) renderLimitDigitsInto(limitValueEl2, text, "#111", 200);
+  if (limitValueEl2) renderLimitDigitsInto(limitValueEl2, text, "#111", 200, LIMIT_DIGIT_SCALE_2);
 }
 function setLimitValueText(text) {
   renderLimitDigits(text);
