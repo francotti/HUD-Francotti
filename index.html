@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0018">
+<meta name="build" content="2026-08-02-0019">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -84,7 +84,7 @@
   .needle-red-glow{opacity:0;pointer-events:none;}
   .needle.over-limit .needle-red-glow{ animation: pulseGlow 1.4s ease-in-out infinite; }
 
-  .frost-glow{opacity:0;pointer-events:none;}
+  .frost-glow, .heat-glow{opacity:0;pointer-events:none;}
   .frost-icon.frost-warn .frost-glow{ animation: pulseGlow 3s ease-in-out infinite; }
 
   footer{
@@ -654,18 +654,36 @@
           <line x1="13" y1="8" x2="13" y2="11.4" stroke-width="1.6"/>
         </g>
 
-        <!-- Frost (snowflake) telltale, small, bottom-right, above the louvre. -->
+        <!-- Frost (snowflake) telltale, small, bottom-left, mirrored to the
+             same distance from centre as the heat icon on the right. -->
         <g class="frost-icon" id="frostIcon">
-          <rect class="frost-glow" x="246" y="198" width="24" height="24" fill="#4a90e2" filter="url(#coldGlowF)"/>
+          <rect class="frost-glow" x="130" y="198" width="24" height="24" fill="#4a90e2" filter="url(#coldGlowF)"/>
           <g stroke="#c8d0d3" stroke-width="2" stroke-linecap="round" fill="none">
-            <line x1="258" y1="203" x2="258" y2="217"/>
-            <line x1="251" y1="206" x2="265" y2="214"/>
-            <line x1="251" y1="214" x2="265" y2="206"/>
+            <line x1="142" y1="203" x2="142" y2="217"/>
+            <line x1="149" y1="206" x2="135" y2="214"/>
+            <line x1="149" y1="214" x2="135" y2="206"/>
           </g>
         </g>
 
-        <!-- Wave/louvre band, drawn after the icon so it covers its lower
-             half, same as the other dials. -->
+        <!-- Heat (sun) telltale, small, bottom-right, where the frost icon
+             used to sit. -->
+        <g class="heat-icon" id="heatIcon">
+          <rect class="heat-glow" x="246" y="198" width="24" height="24" fill="#e2a24a" filter="url(#coldGlowF)"/>
+          <g stroke="#c8d0d3" stroke-width="2" stroke-linecap="round" fill="none">
+            <circle cx="258" cy="210" r="5"/>
+            <line x1="258" y1="199" x2="258" y2="202"/>
+            <line x1="258" y1="218" x2="258" y2="221"/>
+            <line x1="247" y1="210" x2="250" y2="210"/>
+            <line x1="266" y1="210" x2="269" y2="210"/>
+            <line x1="250.7" y1="202.7" x2="252.8" y2="204.8"/>
+            <line x1="263.2" y1="215.2" x2="265.3" y2="217.3"/>
+            <line x1="250.7" y1="217.3" x2="252.8" y2="215.2"/>
+            <line x1="263.2" y1="204.8" x2="265.3" y2="202.7"/>
+          </g>
+        </g>
+
+        <!-- Wave/louvre band, drawn after both icons so it covers their
+             lower halves, same as the other dials. -->
         <g id="frostLouver">
           <rect x="60" y="228" width="280" height="104" fill="url(#wavePatternF)" clip-path="url(#waveClipF)"/>
         </g>
@@ -711,7 +729,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0018</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0019</div>
   </footer>
 </div>
 
