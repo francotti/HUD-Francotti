@@ -543,6 +543,58 @@
       </svg>
     </div>
 
+    <!-- ============ SPEED-LIMIT SIGN — EXACT COPY (for a future HUD
+         variant; original above stays untouched, this one mirrors the
+         same live value so it's a working duplicate, not just markup) ============ -->
+    <div class="gauge gauge-med" id="limitGauge2">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="limitFace2" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="70%" stop-color="#f2f2ee"/>
+            <stop offset="100%" stop-color="#dedede"/>
+          </radialGradient>
+          <radialGradient id="bezelChromeR2" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#4a1400"/>
+            <stop offset="81%"  stop-color="#ff4500"/>
+            <stop offset="83%"  stop-color="#fff3ea"/>
+            <stop offset="85%"  stop-color="#802800"/>
+            <stop offset="87%"  stop-color="#ff7a33"/>
+            <stop offset="89%"  stop-color="#4a1400"/>
+            <stop offset="91%"  stop-color="#fff3ea"/>
+            <stop offset="93%"  stop-color="#e8380f"/>
+            <stop offset="96%"  stop-color="#ff9a5a"/>
+            <stop offset="98%"  stop-color="#3a1000"/>
+            <stop offset="100%" stop-color="#150500"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenR2" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,235,235,.55)"/>
+            <stop offset="32%"  stop-color="rgba(255,235,235,.05)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,60,60,.10)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <mask id="bezelRingR2">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="150" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeR2)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenR2)" mask="url(#bezelRingR2)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <circle cx="200" cy="200" r="150" fill="url(#limitFace2)"/>
+        <text id="limitValue2" x="200" y="200" text-anchor="middle" dominant-baseline="central"
+              font-family="Futura, 'Century Gothic', sans-serif"
+              font-size="120" font-weight="700" fill="#111">--</text>
+      </svg>
+    </div>
+
     <!-- ============ FROST TELLTALE ============ -->
     <div class="gauge gauge-med" id="frostGauge">
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
@@ -1083,6 +1135,13 @@ startWatch();
    to avoid hammering the public instance while driving.
 ===================================================================== */
 const limitValueEl = document.getElementById("limitValue");
+const limitValueEl2 = document.getElementById("limitValue2");
+// Keeps the exact-copy sign (for a future HUD variant) mirroring the
+// same live value as the original, everywhere the original updates.
+function setLimitValueText(text) {
+  limitValueEl.textContent = text;
+  if (limitValueEl2) limitValueEl2.textContent = text;
+}
 let lastLimitFetch = 0;
 const LIMIT_FETCH_INTERVAL_MS = 8000;
 
@@ -1118,9 +1177,9 @@ async function maybeFetchSpeedLimit(lat, lon) {
   lastLimitFetch = now;
   try {
     const { value } = await fetchMaxspeedAt(lat, lon);
-    if (value === Infinity) { currentLimit = null; limitValueEl.textContent = "∞"; }
-    else if (typeof value === "number") { currentLimit = value; limitValueEl.textContent = String(value); }
-    else { currentLimit = null; limitValueEl.textContent = "--"; }
+    if (value === Infinity) { currentLimit = null; setLimitValueText("∞"); }
+    else if (typeof value === "number") { currentLimit = value; setLimitValueText(String(value)); }
+    else { currentLimit = null; setLimitValueText("--"); }
   } catch { /* keep last known value, silent — public Overpass can be flaky */ }
 }
 
@@ -1157,13 +1216,13 @@ limitTestBtn.addEventListener("click", async () => {
     const { value, raw, road } = await fetchMaxspeedAt(loc.lat, loc.lon);
     const roadTxt = road ? ` (${road})` : "";
     if (value === Infinity) {
-      limitValueEl.textContent = "∞";
+      setLimitValueText("∞");
       limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN LIMIET`;
     } else if (typeof value === "number") {
-      limitValueEl.textContent = String(value);
+      setLimitValueText(String(value));
       limitTestResult.textContent = `${loc.label}${roadTxt} · ${value} KM/H`;
     } else {
-      limitValueEl.textContent = "--";
+      setLimitValueText("--");
       limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN MAXSPEED-TAG${raw ? ` (ruw: ${raw})` : ""}`;
     }
   } catch (e) {
