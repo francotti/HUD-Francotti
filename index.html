@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0070">
+<meta name="build" content="2026-08-02-0071">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1039,7 +1039,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0070</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0071</div>
   </footer>
 </div>
 
@@ -1856,6 +1856,13 @@ function renderFrostTemp(value) {
     frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
   }
 
+  // Same colour as whichever ring tier is currently glowing (cold=blue,
+  // red=red) — the ring never glows amber for the "hot" tier, so that
+  // one keeps the plain crisp colour.
+  const cold = value < COLD_WARN_BELOW;
+  const redWarn = value > RED_WARN_ABOVE;
+  const crispColor = cold ? "#4a90e2" : redWarn ? "#d64545" : "#d8dfe1";
+
   function digitGroup(cls, stroke, strokeW, filterAttr) {
     const g = el("g", filterAttr ? { class: cls, filter: filterAttr } : { class: cls });
     chars.forEach((ch, idx) => {
@@ -1873,7 +1880,7 @@ function renderFrostTemp(value) {
   wrapper.appendChild(digitGroup("frost-digit-glow-cold", "#4a90e2", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
   wrapper.appendChild(digitGroup("frost-digit-glow-hot",  "#ffb347", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
   wrapper.appendChild(digitGroup("frost-digit-glow-red",  "#d64545", GLYPH_STROKE + 2.5, "url(#coldGlowF)"));
-  wrapper.appendChild(digitGroup("frost-digit-crisp",     "#d8dfe1", GLYPH_STROKE, null));
+  wrapper.appendChild(digitGroup("frost-digit-crisp",     crispColor, GLYPH_STROKE, null));
   frostDigitsEl.appendChild(wrapper);
 }
 
