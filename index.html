@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0073">
+<meta name="build" content="2026-08-02-0074">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -133,6 +133,16 @@
   body.mode-screen2 #frostThermoIcon,
   body.mode-screen2 #frostIcon,
   body.mode-screen2 #heatIcon{ display:none; }
+
+  /* Scherm 2's compass: drop the wave band, the fixed pointer needle and
+     the rotating letter/tick card — replaced by one wide blue arrow
+     (inside #compassFace, same rotation) that always points north. */
+  #compassNorthArrow{ display:none; }
+  body.mode-screen2 #compassLouver,
+  body.mode-screen2 #compassArrow,
+  body.mode-screen2 #windTicks,
+  body.mode-screen2 #windLetters{ display:none; }
+  body.mode-screen2 #compassNorthArrow{ display:block; }
   /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
      than the ring/needle's pulse (2.8s) since this one is meant to read
      as "slowly" per request. */
@@ -588,6 +598,15 @@
         <g id="compassFace">
           <g id="windTicks"></g>
           <g id="windLetters"></g>
+          <!-- SCHERM 2 only: replaces the letter/tick card with one wide
+               blue arrow (same blue as the frost gauge), point always to
+               true north. Lives inside #compassFace so it gets exactly
+               the same rotation as the old card — no JS changes needed,
+               the point that used to carry the "N" letter now carries
+               the arrow tip. Spans the full inner-face diameter (~260). -->
+          <g id="compassNorthArrow" fill="#4a90e2" stroke="#1f4d7a" stroke-width="2" stroke-linejoin="round">
+            <path d="M 200 72 L 250 155 L 215 155 L 215 330 L 185 330 L 185 155 L 150 155 Z"/>
+          </g>
         </g>
 
         <!-- FIXED compass arrow — points straight up, never rotates (the
@@ -1039,7 +1058,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0073</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0074</div>
   </footer>
 </div>
 
