@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0011">
+<meta name="build" content="2026-08-02-0012">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -378,6 +378,20 @@
             <circle cx="200" cy="200" r="196" fill="white"/>
             <circle cx="200" cy="200" r="160" fill="black"/>
           </mask>
+          <linearGradient id="waveGradW" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#5a5a5a"/>
+            <stop offset="25%"  stop-color="#363636"/>
+            <stop offset="50%"  stop-color="#0a0a0a"/>
+            <stop offset="75%"  stop-color="#363636"/>
+            <stop offset="100%" stop-color="#5a5a5a"/>
+          </linearGradient>
+          <pattern id="wavePatternW" x="0" y="228" width="400" height="16.05747"
+                   patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="400" height="16.05747" fill="url(#waveGradW)"/>
+          </pattern>
+          <clipPath id="waveClipW">
+            <circle cx="200" cy="200" r="132"/>
+          </clipPath>
         </defs>
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeW)"/>
         <rect width="400" height="400" fill="url(#bezelSheenW)" mask="url(#bezelRingW)"/>
@@ -399,6 +413,13 @@
         <g id="compassFace">
           <g id="windTicks"></g>
           <g id="windLetters"></g>
+        </g>
+
+        <!-- Wave/louvre band, fixed (outside the rotating compassFace group)
+             so it stays put and covers the lower half of the rotating card,
+             same as Jaeger's compass. -->
+        <g id="compassLouver">
+          <rect x="60" y="228" width="280" height="104" fill="url(#wavePatternW)" clip-path="url(#waveClipW)"/>
         </g>
       </svg>
     </div>
@@ -517,6 +538,20 @@
           <filter id="coldGlowF" x="-100%" y="-30%" width="300%" height="160%">
             <feGaussianBlur stdDeviation="3"/>
           </filter>
+          <linearGradient id="waveGradF" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#5a5a5a"/>
+            <stop offset="25%"  stop-color="#363636"/>
+            <stop offset="50%"  stop-color="#0a0a0a"/>
+            <stop offset="75%"  stop-color="#363636"/>
+            <stop offset="100%" stop-color="#5a5a5a"/>
+          </linearGradient>
+          <pattern id="wavePatternF" x="0" y="228" width="400" height="16.05747"
+                   patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="400" height="16.05747" fill="url(#waveGradF)"/>
+          </pattern>
+          <clipPath id="waveClipF">
+            <circle cx="200" cy="200" r="132"/>
+          </clipPath>
         </defs>
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeF)"/>
         <rect width="400" height="400" fill="url(#bezelSheenF)" mask="url(#bezelRingF)"/>
@@ -543,6 +578,14 @@
             <line x1="165" y1="220" x2="235" y2="180"/>
           </g>
         </g>
+
+        <!-- Wave/louvre band, drawn after the icon so it covers its lower
+             half, same as the other dials — the temperature readout is
+             drawn on top afterwards so it stays legible. -->
+        <g id="frostLouver">
+          <rect x="60" y="228" width="280" height="104" fill="url(#wavePatternF)" clip-path="url(#waveClipF)"/>
+        </g>
+
         <text id="frostTemp" x="200" y="270" text-anchor="middle"
               font-family="Futura, 'Century Gothic', sans-serif"
               font-size="18" fill="#c8b880">-- °C</text>
@@ -580,7 +623,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0011</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0012</div>
   </footer>
 </div>
 
