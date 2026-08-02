@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0076">
+<meta name="build" content="2026-08-02-0077">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -57,28 +57,39 @@
     body{ padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
   }
 
-  .cluster{display:flex;flex-wrap:wrap;gap:40px;justify-content:center;align-items:flex-start;}
-  .gauge{ width:340px;height:340px;position:relative; }
-  .gauge.gauge-med{ width:200px;height:200px; }
-  .gauge svg{width:100%;height:100%;display:block;}
-  /* Wrapper around the 4 small dials (compass, speed-limit x2, frost).
-     display:contents by default = invisible box, children just sit in
-     .cluster's own flex-wrap exactly as before this wrapper existed. */
-  .small-dials{ display:contents; }
-  @media (max-width:820px){
-    .gauge{width:270px;height:270px;}
-    .gauge.gauge-med{width:150px;height:150px;}
+  /* Speedometer centred, the 4 small dials as a 2x2 grid beside it —
+     same arrangement on both Scherm 1 and Scherm 2, portrait and
+     landscape. DOM order inside .small-dials is compass, limit, limit2,
+     frost; since only one of limit/limit2 is ever visible (display:none
+     on the other), CSS grid auto-placement skips the hidden one
+     entirely, so the visible three always land: compass top-left, limit
+     top-right, frost bottom-left, bottom-right cell empty. --sg (shared
+     "speedo gauge" size) drives both the primary dial's diameter and the
+     small-dial grid, so the grid's total height always matches the
+     speedo's — sized with vh/vw so it fills the screen edge-to-edge on
+     any phone/orientation, not one fixed breakpoint. */
+  .wrap{ --sg: min(80vh, 42vw); }
+  .cluster{
+    display:flex; flex-wrap:nowrap; flex-direction:row;
+    align-items:center; justify-content:center; gap:3vw;
+    width:100%;
   }
-  /* Phone landscape: speedometer on the left, the 4 small dials as a
-     2x2 square to its right — sized with viewport-relative units (vh/vw)
-     so the cluster fills the screen edge-to-edge just like portrait does,
-     on any phone, not just an iPhone 13 mini's exact dimensions. --lg is
-     the shared "landscape gauge" size: the primary dial's diameter, and
-     the small-dial grid is derived from it so both columns end up the
-     exact same total height. */
+  .gauge{ width:var(--sg); height:var(--sg); position:relative; }
+  .gauge svg{width:100%;height:100%;display:block;}
+  .small-dials{
+    display:grid;
+    grid-template-columns:repeat(2, calc(var(--sg)/2 - 5px));
+    grid-template-rows:repeat(2, calc(var(--sg)/2 - 5px));
+    gap:10px;
+  }
+  .gauge.gauge-med{ width:calc(var(--sg)/2 - 5px); height:calc(var(--sg)/2 - 5px); }
+
+  /* Phone landscape: more usable height than width, so --sg leans on vh
+     harder, plus the safe-area padding/header-hide/footer-collapse needed
+     to actually fill a short landscape viewport edge-to-edge. */
   @media (orientation:landscape) and (max-height:500px){
     .wrap{
-      --lg: min(90vh, 46vw);
+      --sg: min(90vh, 46vw);
       padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right))
                max(4px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
       gap:4px;
@@ -90,19 +101,6 @@
        reserves layout height — collapse it once hidden so the cluster
        can actually claim the freed-up vertical space and fill the screen. */
     body.footer-hidden footer{ max-height:0;margin:0;overflow:hidden; }
-    .cluster{
-      flex-wrap:nowrap; flex-direction:row;
-      align-items:center; justify-content:center; gap:3vw;
-      width:100%;
-    }
-    .gauge{ width:var(--lg);height:var(--lg); }
-    .small-dials{
-      display:grid;
-      grid-template-columns:repeat(2, calc(var(--lg)/2 - 5px));
-      grid-template-rows:repeat(2, calc(var(--lg)/2 - 5px));
-      gap:10px;
-    }
-    .gauge.gauge-med{ width:calc(var(--lg)/2 - 5px);height:calc(var(--lg)/2 - 5px); }
   }
 
   /* "SCHERM 2" — a second, hub-mirror-mount source variant on the same
@@ -1062,7 +1060,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0076</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0077</div>
   </footer>
 </div>
 
