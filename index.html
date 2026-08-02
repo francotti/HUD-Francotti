@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0002">
+<meta name="build" content="2026-08-02-0003">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -485,6 +485,13 @@
       <div class="nav-instruction" id="navInstruction"></div>
       <div class="nav-sub" id="navSub"></div>
     </div>
+    <div class="nav-panel">
+      <div class="nav-row">
+        <input id="limitTestAddr" type="text" placeholder="Adres om limiet te testen">
+        <button class="btn-vintage btn-small" id="limitTestBtn">ZOEK LIMIET</button>
+      </div>
+      <div class="nav-sub" id="limitTestResult"></div>
+    </div>
     <div class="loc-row">
       <span id="locMode"><span class="tag">LOC</span> — </span>
       <button class="btn-vintage btn-small" id="useLocBtn">USE LOCATION</button>
@@ -497,7 +504,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0002</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0003</div>
   </footer>
 </div>
 
@@ -833,23 +840,81 @@ function parseMaxspeed(raw) {
   return isNaN(num) ? null : num;
 }
 
+/* Core Overpass lookup, shared by the live GPS polling below and the
+   manual "ZOEK LIMIET" address test. Returns {value, raw} where value
+   is a number (km/h), Infinity (no limit / Autobahn-style "none"), or
+   null (no maxspeed tag found on the nearest way). Throws on network
+   errors so callers can distinguish "no data" from "lookup failed". */
+async function fetchMaxspeedAt(lat, lon) {
+  const q = `[out:json][timeout:8];way(around:25,${lat},${lon})[highway][maxspeed];out tags 3;`;
+  const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q), { cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  const way = j.elements && j.elements[0];
+  const raw = way && way.tags && way.tags.maxspeed;
+  const road = way && way.tags && (way.tags.name || way.tags.ref);
+  return { value: parseMaxspeed(raw), raw: raw || null, road: road || null };
+}
+
 async function maybeFetchSpeedLimit(lat, lon) {
   const now = Date.now();
   if (now - lastLimitFetch < LIMIT_FETCH_INTERVAL_MS) return;
   lastLimitFetch = now;
   try {
-    const q = `[out:json][timeout:8];way(around:25,${lat},${lon})[highway][maxspeed];out tags 3;`;
-    const r = await fetch("https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(q), { cache: "no-store" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    const way = j.elements && j.elements[0];
-    const ms = way && way.tags && way.tags.maxspeed;
-    const parsed = parseMaxspeed(ms);
-    if (parsed === Infinity) { currentLimit = null; limitValueEl.textContent = "∞"; }
-    else if (typeof parsed === "number") { currentLimit = parsed; limitValueEl.textContent = String(parsed); }
+    const { value } = await fetchMaxspeedAt(lat, lon);
+    if (value === Infinity) { currentLimit = null; limitValueEl.textContent = "∞"; }
+    else if (typeof value === "number") { currentLimit = value; limitValueEl.textContent = String(value); }
     else { currentLimit = null; limitValueEl.textContent = "--"; }
   } catch { /* keep last known value, silent — public Overpass can be flaky */ }
 }
+
+/* ---------------- Manual address test (ZOEK LIMIET) ----------------
+   Geocodes a typed address via Open-Meteo's free geocoding endpoint
+   (no key needed), then runs the same Overpass lookup used for live
+   driving, and shows the result — including on the actual limit sign
+   dial — without waiting for a real GPS fix. */
+async function geocodeAddress(query) {
+  const r = await fetch(
+    "https://geocoding-api.open-meteo.com/v1/search" +
+    `?name=${encodeURIComponent(query)}&count=1&language=nl&format=json`,
+    { cache: "no-store" }
+  );
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const j = await r.json();
+  const hit = j.results && j.results[0];
+  if (!hit) return null;
+  return {
+    lat: hit.latitude, lon: hit.longitude,
+    label: [hit.name, hit.admin1, hit.country].filter(Boolean).join(", ")
+  };
+}
+
+const limitTestAddr = document.getElementById("limitTestAddr");
+const limitTestBtn = document.getElementById("limitTestBtn");
+const limitTestResult = document.getElementById("limitTestResult");
+limitTestBtn.addEventListener("click", async () => {
+  const query = limitTestAddr.value.trim();
+  if (!query) { limitTestResult.textContent = "— VOER EEN ADRES IN —"; return; }
+  limitTestResult.textContent = "— ZOEKEN —";
+  try {
+    const loc = await geocodeAddress(query);
+    if (!loc) { limitTestResult.textContent = "— ADRES NIET GEVONDEN —"; return; }
+    const { value, raw, road } = await fetchMaxspeedAt(loc.lat, loc.lon);
+    const roadTxt = road ? ` (${road})` : "";
+    if (value === Infinity) {
+      limitValueEl.textContent = "∞";
+      limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN LIMIET`;
+    } else if (typeof value === "number") {
+      limitValueEl.textContent = String(value);
+      limitTestResult.textContent = `${loc.label}${roadTxt} · ${value} KM/H`;
+    } else {
+      limitValueEl.textContent = "--";
+      limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN MAXSPEED-TAG${raw ? ` (ruw: ${raw})` : ""}`;
+    }
+  } catch (e) {
+    limitTestResult.textContent = "— FOUT: " + String(e.message || e).toUpperCase() + " —";
+  }
+});
 
 /* =====================================================================
    FROST ALERT — Open-Meteo current temperature for the GPS position,
