@@ -155,9 +155,99 @@
     <!-- ============ SPEED DIAL (primary) ============ -->
     <div class="gauge" id="speedGauge">
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <use href="#bezelBase" x="0" y="0"/>
+        <defs>
+          <radialGradient id="bezelChromeS" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenS" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceS" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <radialGradient id="innerBezelS" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenS" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingS">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
+          <radialGradient id="deepFaceS" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
+          <mask id="bezelRingS">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+          <radialGradient id="bezelInnerShadowS" cx="200" cy="200" r="132" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"  stop-color="#000" stop-opacity="0"/>
+            <stop offset="88%" stop-color="#000" stop-opacity="0"/>
+            <stop offset="96%" stop-color="#000" stop-opacity="0.38"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0.70"/>
+          </radialGradient>
+          <linearGradient id="needleLeftS" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stop-color="#8a969b"/>
+            <stop offset="100%" stop-color="#c5ccce"/>
+          </linearGradient>
+          <linearGradient id="needleRightS" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stop-color="#eef1f3"/>
+            <stop offset="100%" stop-color="#bcc5c9"/>
+          </linearGradient>
+          <filter id="needleShadowS" x="-50%" y="-10%" width="200%" height="120%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.4"/>
+          </filter>
+          <filter id="coldGlowS" x="-100%" y="-30%" width="300%" height="160%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeS)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenS)" mask="url(#bezelRingS)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceS)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelS)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenS)" mask="url(#innerBezelRingS)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#deepFaceS)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
         <g id="speedTicks"></g>
-        <circle cx="200" cy="200" r="132" fill="url(#bezelInnerShadow)" pointer-events="none"/>
+        <circle cx="200" cy="200" r="132" fill="url(#bezelInnerShadowS)" pointer-events="none"/>
         <g id="speedNumerals"></g>
 
         <!-- Unit label -->
@@ -171,12 +261,12 @@
               font-size="13" fill="#c8b880" opacity="0.92"></text>
 
         <g id="speedNeedle" class="needle">
-          <rect x="187" y="142" width="11" height="139" fill="#000" opacity="0.65" filter="url(#needleShadow)"/>
+          <rect x="187" y="142" width="11" height="139" fill="#000" opacity="0.65" filter="url(#needleShadowS)"/>
           <rect x="194" y="140" width="12" height="141" fill="#b8c2c6"/>
-          <path d="M 194,140 L 200,140 L 200,281 L 194,281 Z" fill="url(#needleLeft)"/>
-          <path d="M 200,140 L 206,140 L 206,281 L 200,281 Z" fill="url(#needleRight)"/>
+          <path d="M 194,140 L 200,140 L 200,281 L 194,281 Z" fill="url(#needleLeftS)"/>
+          <path d="M 200,140 L 206,140 L 206,281 L 200,281 Z" fill="url(#needleRightS)"/>
           <circle cx="200" cy="271" r="3.2" fill="#0c0804"/>
-          <rect class="needle-red-glow" x="186" y="138" width="28" height="145" fill="#d64545" filter="url(#coldGlow)"/>
+          <rect class="needle-red-glow" x="186" y="138" width="28" height="145" fill="#d64545" filter="url(#coldGlowS)"/>
         </g>
 
         <text x="200" y="300" text-anchor="middle"
@@ -188,7 +278,77 @@
     <!-- ============ COMPASS DIAL (optional) ============ -->
     <div class="gauge gauge-med" id="compassGauge" style="display:none;">
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <use href="#bezelBase" x="0" y="0"/>
+        <defs>
+          <radialGradient id="bezelChromeW" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenW" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceW" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <radialGradient id="innerBezelW" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenW" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingW">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
+          <radialGradient id="deepFaceW" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
+          <mask id="bezelRingW">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeW)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenW)" mask="url(#bezelRingW)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceW)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelW)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenW)" mask="url(#innerBezelRingW)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#deepFaceW)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
         <g id="compassFace">
           <g id="windTicks"></g>
           <g id="windLetters"></g>
@@ -221,9 +381,82 @@
     <!-- ============ FROST TELLTALE ============ -->
     <div class="gauge gauge-med" id="frostGauge">
       <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <use href="#bezelBase" x="0" y="0"/>
+        <defs>
+          <radialGradient id="bezelChromeF" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenF" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceF" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <radialGradient id="innerBezelF" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenF" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingF">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
+          <radialGradient id="deepFaceF" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
+          <mask id="bezelRingF">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+          <filter id="coldGlowF" x="-100%" y="-30%" width="300%" height="160%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeF)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenF)" mask="url(#bezelRingF)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceF)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelF)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenF)" mask="url(#innerBezelRingF)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#deepFaceF)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
         <g class="frost-icon" id="frostIcon">
-          <rect class="frost-glow" x="150" y="150" width="100" height="100" fill="#4a90e2" filter="url(#coldGlow)"/>
+          <rect class="frost-glow" x="150" y="150" width="100" height="100" fill="#4a90e2" filter="url(#coldGlowF)"/>
           <g stroke="#c8d0d3" stroke-width="4" stroke-linecap="round" fill="none">
             <line x1="200" y1="160" x2="200" y2="240"/>
             <line x1="165" y1="180" x2="235" y2="220"/>
@@ -239,105 +472,6 @@
       </svg>
     </div>
   </div>
-
-  <!-- ============ SHARED DEFS (bezel/face/needle/glow) — referenced by all gauges via <use> ============ -->
-  <svg width="0" height="0" style="position:absolute">
-    <defs>
-      <g id="bezelBase">
-        <radialGradient id="bezelChrome" cx="50%" cy="50%" r="50%">
-          <stop offset="76%"  stop-color="#000000"/>
-          <stop offset="79%"  stop-color="#222226"/>
-          <stop offset="81%"  stop-color="#c8cfd6"/>
-          <stop offset="83%"  stop-color="#fbfcfe"/>
-          <stop offset="85%"  stop-color="#5a6066"/>
-          <stop offset="87%"  stop-color="#eef2f5"/>
-          <stop offset="89%"  stop-color="#3a4048"/>
-          <stop offset="91%"  stop-color="#fafbfd"/>
-          <stop offset="93%"  stop-color="#7e8690"/>
-          <stop offset="96%"  stop-color="#edf1f4"/>
-          <stop offset="98%"  stop-color="#23262a"/>
-          <stop offset="100%" stop-color="#050508"/>
-        </radialGradient>
-        <linearGradient id="bezelSheen" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
-          <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
-          <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
-          <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
-          <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
-          <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
-        </linearGradient>
-        <radialGradient id="face" cx="50%" cy="45%" r="60%">
-          <stop offset="0%"   stop-color="#151515"/>
-          <stop offset="55%"  stop-color="#0c0c0c"/>
-          <stop offset="100%" stop-color="#030303"/>
-        </radialGradient>
-        <radialGradient id="innerBezel" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stop-color="#2e2e2e"/>
-          <stop offset="90%"  stop-color="#2a2a2a"/>
-          <stop offset="100%" stop-color="#1b1b1b"/>
-        </radialGradient>
-        <linearGradient id="innerBezelSheen" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
-          <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
-          <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
-        </linearGradient>
-        <mask id="innerBezelRing">
-          <rect width="400" height="400" fill="black"/>
-          <circle cx="200" cy="200" r="142" fill="white"/>
-          <circle cx="200" cy="200" r="132" fill="black"/>
-        </mask>
-        <radialGradient id="deepFace" cx="50%" cy="40%" r="60%">
-          <stop offset="0%"   stop-color="#252525"/>
-          <stop offset="55%"  stop-color="#1f1f1f"/>
-          <stop offset="100%" stop-color="#1a1a1a"/>
-        </radialGradient>
-        <mask id="bezelRing">
-          <rect width="400" height="400" fill="black"/>
-          <circle cx="200" cy="200" r="196" fill="white"/>
-          <circle cx="200" cy="200" r="160" fill="black"/>
-        </mask>
-        <circle cx="200" cy="200" r="196" fill="url(#bezelChrome)"/>
-        <rect width="400" height="400" fill="url(#bezelSheen)" mask="url(#bezelRing)"/>
-        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
-        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
-        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
-        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
-        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
-        <circle cx="200" cy="200" r="156" fill="url(#face)"/>
-        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
-        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
-        <circle cx="200" cy="200" r="142" fill="url(#innerBezel)"/>
-        <rect width="400" height="400" fill="url(#innerBezelSheen)" mask="url(#innerBezelRing)"/>
-        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
-        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
-        <circle cx="200" cy="200" r="132" fill="url(#deepFace)"/>
-        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
-        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
-      </g>
-
-      <radialGradient id="bezelInnerShadow" cx="200" cy="200" r="132" gradientUnits="userSpaceOnUse">
-        <stop offset="0%"  stop-color="#000" stop-opacity="0"/>
-        <stop offset="88%" stop-color="#000" stop-opacity="0"/>
-        <stop offset="96%" stop-color="#000" stop-opacity="0.38"/>
-        <stop offset="100%" stop-color="#000" stop-opacity="0.70"/>
-      </radialGradient>
-
-      <linearGradient id="needleLeft" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0%"   stop-color="#8a969b"/>
-        <stop offset="100%" stop-color="#c5ccce"/>
-      </linearGradient>
-      <linearGradient id="needleRight" x1="0" x2="1" y1="0" y2="0">
-        <stop offset="0%"   stop-color="#eef1f3"/>
-        <stop offset="100%" stop-color="#bcc5c9"/>
-      </linearGradient>
-      <filter id="needleShadow" x="-50%" y="-10%" width="200%" height="120%">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="1.4"/>
-      </filter>
-      <filter id="coldGlow" x="-100%" y="-30%" width="300%" height="160%">
-        <feGaussianBlur stdDeviation="3"/>
-      </filter>
-    </defs>
-  </svg>
 
   <footer>
     <div id="statusLine" class="status">— OPSTARTEN —</div>
