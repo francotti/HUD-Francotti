@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0054">
+<meta name="build" content="2026-08-02-0055">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -944,7 +944,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0054</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0055</div>
   </footer>
 </div>
 
@@ -1142,7 +1142,7 @@ function startSiren() {
   const ctx = ensureSirenCtx();
   if (!ctx) return;
   try {
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
     sirenOsc = ctx.createOscillator();
     sirenLFO = ctx.createOscillator();
     const lfoGain = ctx.createGain();
@@ -1154,7 +1154,7 @@ function startSiren() {
     lfoGain.gain.value = 250;         // sweeps ~350-850 Hz
     sirenLFO.connect(lfoGain);
     lfoGain.connect(sirenOsc.frequency);
-    sirenGain.gain.value = 0.16;
+    sirenGain.gain.value = 0.35;
     sirenOsc.connect(sirenGain);
     sirenGain.connect(ctx.destination);
     sirenOsc.start();
@@ -1169,10 +1169,25 @@ function stopSiren() {
   try { sirenLFO && sirenLFO.stop(); } catch {}
   sirenOsc = null; sirenLFO = null; sirenGain = null;
 }
-// iOS/Safari only allow starting audio from a real user gesture — warm
-// up the context on the first tap anywhere so a later siren can play
-// even though it's triggered from a GPS callback, not a click.
-function unlockSirenAudio() { ensureSirenCtx(); }
+// iOS/Safari only allow *resuming* an AudioContext from within a real
+// user-gesture call stack — just creating the context (the old code)
+// isn't enough, it's still born "suspended" on iOS and a later
+// ctx.resume() from an async GPS callback is silently ignored. So on
+// the very first tap anywhere, explicitly resume() here AND fire a
+// near-silent blip to fully warm up the audio pipeline, so the siren
+// can actually play later even though it's triggered from GPS, not a tap.
+function unlockSirenAudio() {
+  const ctx = ensureSirenCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  try {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.gain.value = 0.0001; // effectively silent, just to unlock the pipeline
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.05);
+  } catch {}
+}
 document.addEventListener("click", unlockSirenAudio, { once: true });
 document.addEventListener("touchstart", unlockSirenAudio, { once: true, passive: true });
 
