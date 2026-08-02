@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0067">
+<meta name="build" content="2026-08-02-0068">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -123,8 +123,14 @@
   body.mode-screen2 #speedNumerals,
   body.mode-screen2 #speedNeedle,
   body.mode-screen2 #speedUnitLabel,
-  body.mode-screen2 #speedMicroPrint{ display:none; }
+  body.mode-screen2 #speedMicroPrint,
+  body.mode-screen2 #speedWarnDigits{ display:none; }
   body.mode-screen2 #speedBigDigits{ display:block; }
+  /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
+     than the ring/needle's pulse (2.8s) since this one is meant to read
+     as "slowly" per request. */
+  .speed-big-digit-glow{ opacity:0; pointer-events:none; }
+  #speedBigDigits.yellow-glow .speed-big-digit-glow{ animation: pulseGlow 3.6s ease-in-out infinite; }
 
   /* Mirror mode — for mounting the phone in a windshield HUD reflector
      (a glass/mirror combiner): flips the whole dial cluster horizontally,
@@ -1026,7 +1032,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0067</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0068</div>
   </footer>
 </div>
 
@@ -1141,9 +1147,12 @@ const speedBigDigitsEl  = document.getElementById("speedBigDigits");
 // Scherm 2's big digital speedo readout — same hand-drawn glyph font as
 // the tick numerals/limit sign, always kept up to date (even while
 // hidden on Scherm 1) so it's instantly correct the moment SCHERM 2 is
-// toggled on. Plain white, no warning-tier colouring (the ring already
-// carries that signal).
-function renderSpeedBigDigits(value) {
+// toggled on. Its own simple 2-tier colour scheme (independent of the
+// ring/needle's amber/red/extreme tiers):
+//   "normal"      — plain white, no glow (at/under the limit)
+//   "yellow"      — static yellow (0-4 km/h over)
+//   "yellow-glow" — yellow, slowly pulsing (>=5 km/h over)
+function renderSpeedBigDigits(value, tier) {
   while (speedBigDigitsEl.firstChild) speedBigDigitsEl.removeChild(speedBigDigitsEl.firstChild);
   const chars = String(Math.round(Math.max(0, value))).split("");
   const offsets = [0];
@@ -1152,14 +1161,22 @@ function renderSpeedBigDigits(value) {
     offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
   }
   const totalW = offsets[offsets.length - 1];
-  chars.forEach((ch, idx) => {
-    const gx = offsets[idx] - totalW / 2;
-    speedBigDigitsEl.appendChild(el("path", {
-      d: GLYPH[ch], fill: "none", stroke: "#ffffff",
-      "stroke-width": GLYPH_STROKE, "stroke-linecap": "round", "stroke-linejoin": "round",
-      transform: `translate(${gx} 0)`
-    }));
-  });
+  function digitGroup(cls, stroke, strokeW, filterAttr) {
+    const g = el("g", filterAttr ? { class: cls, filter: filterAttr } : { class: cls });
+    chars.forEach((ch, idx) => {
+      const gx = offsets[idx] - totalW / 2;
+      g.appendChild(el("path", {
+        d: GLYPH[ch], fill: "none", stroke,
+        "stroke-width": strokeW, "stroke-linecap": "round", "stroke-linejoin": "round",
+        transform: `translate(${gx} 0)`
+      }));
+    });
+    return g;
+  }
+  const crispColor = tier === "normal" ? "#ffffff" : "#ffd83d";
+  speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-glow", "#ffd83d", GLYPH_STROKE + 2.5, "url(#coldGlowS)"));
+  speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-crisp", crispColor, GLYPH_STROKE, null));
+  speedBigDigitsEl.classList.toggle("yellow-glow", tier === "yellow-glow");
   // Shifted up further from y=170 per request.
   speedBigDigitsEl.setAttribute("transform", "translate(200 155) scale(6)");
 }
@@ -1303,7 +1320,6 @@ document.addEventListener("touchstart", unlockSirenAudio, { once: true, passive:
 function pointSpeedTo(v, opts = {}) {
   const clamped = Math.max(SPEED_MIN, Math.min(SPEED_MAX, v));
   speedNeedle.style.transform = `rotate(${speedAngle(clamped)}deg)`;
-  renderSpeedBigDigits(clamped);
   const suppress = !!opts.suppressWarn;
   const delta = typeof currentLimit === "number" ? v - currentLimit : null;
   // 0-5 over: amber (needle + digit readout only).
@@ -1321,6 +1337,10 @@ function pointSpeedTo(v, opts = {}) {
   if (red) renderSpeedWarnDigits(v, "#d64545");
   else if (hot) renderSpeedWarnDigits(v, "#ffb347");
   else clearSpeedWarnDigits();
+  // Scherm 2's big digit has its own simpler 2-tier scheme, independent
+  // of the ring/needle's amber/red/extreme tiers above: 0-4 over the
+  // limit = static yellow, >=5 over = slow yellow glow.
+  renderSpeedBigDigits(clamped, red ? "yellow-glow" : (hot ? "yellow" : "normal"));
   if (opts.showDigital) speedDigital.textContent = `${v.toFixed(0)}`;
   else if (!testRunActive) speedDigital.textContent = "";
 }
