@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0084">
+<meta name="build" content="2026-08-02-0085">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -59,16 +59,16 @@
 
   /* Speedometer truly in the middle: compass (top) + frost (bottom)
      stacked on the LEFT, speedo in its own centre column spanning both
-     rows, speedlimit on the RIGHT (bottom-right cell unused). Same
-     arrangement on both Scherm 1 and Scherm 2, portrait and landscape.
-     .small-dials stays display:contents (an invisible wrapper) so
-     compass/limit/limit2/frost become direct grid items of .cluster
-     itself, addressable by explicit grid-area. Only one of limit/limit2
-     is ever visible (display:none on the other) but both share the same
-     "limit" area, so whichever is shown lands in the right column. --sg
-     (speedo diameter) and --sm (small-dial diameter) are sized with
-     vh/vw so it fills the screen edge-to-edge on any phone/orientation,
-     not one fixed breakpoint. */
+     rows, speedlimit (top) + signal-quality telltale (bottom) on the
+     RIGHT. Same arrangement on both Scherm 1 and Scherm 2, portrait and
+     landscape. .small-dials stays display:contents (an invisible
+     wrapper) so compass/limit/limit2/frost/signal become direct grid
+     items of .cluster itself, addressable by explicit grid-area. Only
+     one of limit/limit2 is ever visible (display:none on the other) but
+     both share the same "limit" area, so whichever is shown lands in
+     the top-right. --sg (speedo diameter) and --sm (small-dial diameter)
+     are sized with vh/vw so it fills the screen edge-to-edge on any
+     phone/orientation, not one fixed breakpoint. */
   .wrap{ --sg: min(80vh, 42vw); --sm: calc(var(--sg)/2 - 5px); }
   .cluster{
     display:grid;
@@ -76,7 +76,7 @@
     grid-template-rows: var(--sm) var(--sm);
     grid-template-areas:
       "compass speedo limit"
-      "frost   speedo .";
+      "frost   speedo signal";
     align-items:center; justify-content:center;
     gap:10px 3vw;
     width:100%;
@@ -86,6 +86,7 @@
   #compassGauge{ grid-area: compass; }
   #limitGauge, #limitGauge2{ grid-area: limit; }
   #frostGauge{ grid-area: frost; }
+  #signalGauge{ grid-area: signal; }
   .gauge{ width:var(--sg); height:var(--sg); position:relative; }
   .gauge svg{width:100%;height:100%;display:block;}
   .gauge.gauge-med{ width:var(--sm); height:var(--sm); }
@@ -1031,6 +1032,135 @@
         </g>
       </svg>
     </div>
+
+    <!-- ============ GPS SIGNAL QUALITY TELLTALE ============
+         Crosshair + 1-3 concentric rings, filled in by
+         renderSignalQuality() below from coords.accuracy (metres):
+         1 green ring = good (<=15m), 2 amber rings = medium (<=50m),
+         3 red rings (outermost reaches the face edge) = poor/no fix. -->
+    <div class="gauge gauge-med" id="signalGauge">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bezelChromeG" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenG" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceG" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <radialGradient id="innerBezelG" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenG" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingG">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
+          <radialGradient id="deepFaceG" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
+          <mask id="bezelRingG">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+          <linearGradient id="waveGradG" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#5a5a5a"/>
+            <stop offset="25%"  stop-color="#363636"/>
+            <stop offset="50%"  stop-color="#0a0a0a"/>
+            <stop offset="75%"  stop-color="#363636"/>
+            <stop offset="100%" stop-color="#5a5a5a"/>
+          </linearGradient>
+          <pattern id="wavePatternG" x="0" y="228" width="400" height="16.05747"
+                   patternUnits="userSpaceOnUse">
+            <rect x="0" y="0" width="400" height="16.05747" fill="url(#waveGradG)"/>
+          </pattern>
+          <clipPath id="waveClipG">
+            <circle cx="200" cy="200" r="132"/>
+          </clipPath>
+          <filter id="plateShadowG" x="-20%" y="-20%" width="140%" height="160%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.4"/>
+            <feOffset dx="0.6" dy="2"/>
+            <feComponentTransfer><feFuncA type="linear" slope=".75"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="plateBrightenG" x="0%" y="0%" width="100%" height="100%">
+            <feComponentTransfer>
+              <feFuncR type="linear" slope="1.52"/>
+              <feFuncG type="linear" slope="1.52"/>
+              <feFuncB type="linear" slope="1.52"/>
+            </feComponentTransfer>
+          </filter>
+        </defs>
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeG)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenG)" mask="url(#bezelRingG)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceG)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelG)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenG)" mask="url(#innerBezelRingG)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#deepFaceG)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+
+        <!-- Crosshair reticle (fixed, neutral) + rings (filled in by
+             renderSignalQuality() below). -->
+        <g stroke="#8a9296" stroke-width="2" stroke-linecap="round">
+          <line x1="200" y1="175" x2="200" y2="185"/>
+          <line x1="200" y1="215" x2="200" y2="225"/>
+          <line x1="175" y1="200" x2="185" y2="200"/>
+          <line x1="215" y1="200" x2="225" y2="200"/>
+        </g>
+        <g id="signalRings" fill="none" stroke-linecap="round"></g>
+
+        <g id="signalLouver">
+          <rect x="60" y="228" width="280" height="104" fill="url(#wavePatternG)" clip-path="url(#waveClipG)"/>
+        </g>
+
+        <g transform="translate(200,290)" filter="url(#plateShadowG)">
+          <image href="jaeger-logo.png"
+                 x="-31.68" y="-21.58" width="63.36" height="31.16"
+                 preserveAspectRatio="xMidYMid meet"
+                 filter="url(#plateBrightenG)"/>
+        </g>
+      </svg>
+    </div>
     </div>
   </div>
 
@@ -1068,7 +1198,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0084</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0085</div>
   </footer>
 </div>
 
@@ -1656,8 +1786,9 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 }
 
 function onPosition(p) {
-  const { latitude: lat, longitude: lon, speed } = p.coords;
+  const { latitude: lat, longitude: lon, speed, accuracy } = p.coords;
   const t = p.timestamp;
+  renderSignalQuality(typeof accuracy === "number" ? accuracy : null);
   let kmh;
   if (typeof speed === "number" && speed >= 0) {
     kmh = speed * 3.6;
@@ -1682,6 +1813,7 @@ function onPositionError(err) {
   const reason = err && err.code === 1 ? "DENIED" : err && err.code === 2 ? "UNAVAILABLE" : err && err.code === 3 ? "TIMEOUT" : "ERROR";
   setLocMode(reason);
   setStatus(`— LOCATIE ${reason} —`, true);
+  renderSignalQuality(null); // no usable fix — worst tier
 }
 function startWatch() {
   if (!navigator.geolocation) { setStatus("— GEOLOCATIE NIET ONDERSTEUND —", true); return; }
@@ -1865,6 +1997,28 @@ const frostBezelGlow = document.getElementById("frostBezelGlow");
 const frostIcon = document.getElementById("frostIcon");
 const frostDigitsEl = document.getElementById("frostDigits");
 const frostUnitEl = document.getElementById("frostUnit");
+
+// GPS signal-quality telltale — crosshair with 1-3 concentric rings,
+// driven by coords.accuracy (metres). Fewer/smaller rings + green = good
+// fix, more rings + amber/red = worse. Unknown (no fix yet) counts as
+// the worst tier, same as a genuinely poor fix.
+const signalRingsEl = document.getElementById("signalRings");
+const SIGNAL_RING_RADII = [35, 75, 124];
+function renderSignalQuality(accuracyMeters) {
+  while (signalRingsEl.firstChild) signalRingsEl.removeChild(signalRingsEl.firstChild);
+  let tierCount, color;
+  if (typeof accuracyMeters === "number" && accuracyMeters <= 15) { tierCount = 1; color = "#4caf50"; }
+  else if (typeof accuracyMeters === "number" && accuracyMeters <= 50) { tierCount = 2; color = "#ffb347"; }
+  else { tierCount = 3; color = "#d64545"; }
+  for (let i = 0; i < tierCount; i++) {
+    signalRingsEl.appendChild(el("circle", {
+      cx: 200, cy: 200, r: SIGNAL_RING_RADII[i],
+      stroke: color, "stroke-width": 6
+    }));
+  }
+}
+renderSignalQuality(null); // no fix yet at boot — starts on the red/3-ring tier
+
 let lastWeatherFetch = 0;
 const WEATHER_FETCH_INTERVAL_MS = 10 * 60 * 1000;
 
