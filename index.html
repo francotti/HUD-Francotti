@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0080">
+<meta name="build" content="2026-08-02-0081">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1066,7 +1066,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0080</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0081</div>
   </footer>
 </div>
 
@@ -2134,15 +2134,33 @@ scheduleFullscreenHide(); // initial 3s-after-load hide; any tap resets this sam
 let wakeLock = null;
 async function requestWakeLock() {
   if (!("wakeLock" in navigator)) return;
+  if (wakeLock) return; // already holding one
   try {
     wakeLock = await navigator.wakeLock.request("screen");
-    wakeLock.addEventListener("release", () => { wakeLock = null; });
+    wakeLock.addEventListener("release", () => {
+      wakeLock = null;
+      // A release can happen for reasons other than backgrounding —
+      // some browsers silently drop it after a while even on a visible
+      // page — so try to grab it straight back if we're still on screen.
+      if (document.visibilityState === "visible") requestWakeLock();
+    });
   } catch { /* e.g. Low Power Mode, or not allowed yet — silently skip */ }
 }
 requestWakeLock();
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") requestWakeLock();
 });
+// Extra safety net for long drives: don't just rely on the release event
+// firing reliably — periodically check/reacquire so the screen never
+// ends up dimming mid-trip even after hours of use.
+setInterval(() => {
+  if (document.visibilityState === "visible") requestWakeLock();
+}, 20000);
+// The very first request above happens before any user interaction;
+// some browsers only honour Wake Lock once a real gesture has occurred,
+// so also grab it on the first tap as a fallback.
+document.addEventListener("click", requestWakeLock, { once: true });
+document.addEventListener("touchstart", requestWakeLock, { once: true, passive: true });
 
 /* Boot */
 pointSpeedTo(0);
