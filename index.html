@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0095">
+<meta name="build" content="2026-08-02-0096">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -882,7 +882,13 @@
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        <!-- Outer dark recessed ring + shadow arcs, same as the other
+             dials — without this, the white face ran straight out to the
+             chrome bezel with no inset border. -->
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="150" fill="url(#limitFace2)"/>
+        <path d="M 62 200 A 138 138 0 0 1 338 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 64 200 A 136 136 0 0 1 336 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
         <!-- Same hand-drawn vintage-gauge digit set as the other dials
              (filled in by renderLimitDigits2() below). -->
         <g id="limitValue2"></g>
@@ -1248,7 +1254,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0095</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0096</div>
   </footer>
 </div>
 
