@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0105">
+<meta name="build" content="2026-08-02-0106">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1292,6 +1292,7 @@
       <button class="btn-vintage btn-small" id="speedWarnTestBtn">TEST LIMIT WARN</button>
       <button class="btn-vintage btn-small" id="frostTestBtn">TEST FROST</button>
       <button class="btn-vintage btn-small" id="signalTestBtn">TEST SIGNAL</button>
+      <button class="btn-vintage btn-small" id="pingTestBtn">TEST PING</button>
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
       <button class="btn-vintage btn-small" id="screen2Btn">SCHERM 2</button>
@@ -1302,7 +1303,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0105</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0106</div>
   </footer>
 </div>
 
@@ -2375,6 +2376,47 @@ signalTestBtn.addEventListener("click", () => {
     signalTestTimer = setTimeout(step, SIGNAL_TEST_HOLD_MS);
   };
   step();
+});
+
+/* ---------------- TEST PING — cycle the speed-limit-change sonar ping
+   through a run of up/down steps so both tones can be heard without
+   waiting for real zone changes while driving. Starts from a silent
+   baseline (no ping on the very first step, matching production, where
+   a jump from "unknown" doesn't ping either), then every following step
+   is a genuine numeric change and pings. ---------------- */
+const PING_TEST_BASELINE = 30;
+const PING_TEST_STEPS = [50, 80, 50, 30, 60]; // each step vs. the previous = one ping
+const PING_TEST_HOLD_MS = 1300;
+let pingTestActive = false, pingTestTimer = null, pingTestSavedLimit = null;
+const pingTestBtn = document.getElementById("pingTestBtn");
+function stopPingTest() {
+  pingTestActive = false;
+  clearTimeout(pingTestTimer);
+  pingTestTimer = null;
+  pingTestBtn.textContent = "TEST PING";
+  currentLimit = pingTestSavedLimit;
+  setLimitValueText(typeof currentLimit === "number" ? String(currentLimit) : "--");
+}
+pingTestBtn.addEventListener("click", () => {
+  if (pingTestActive) { stopPingTest(); return; }
+  pingTestActive = true;
+  pingTestSavedLimit = currentLimit;
+  pingTestBtn.textContent = "STOP TEST";
+  currentLimit = PING_TEST_BASELINE;
+  setLimitValueText(String(PING_TEST_BASELINE));
+  let i = 0;
+  const step = () => {
+    if (!pingTestActive) return;
+    if (i >= PING_TEST_STEPS.length) { stopPingTest(); return; }
+    const next = PING_TEST_STEPS[i];
+    const prev = currentLimit;
+    currentLimit = next;
+    setLimitValueText(String(next));
+    if (typeof prev === "number" && next !== prev) playLimitChangePing(next > prev);
+    i++;
+    pingTestTimer = setTimeout(step, PING_TEST_HOLD_MS);
+  };
+  pingTestTimer = setTimeout(step, PING_TEST_HOLD_MS);
 });
 
 /* =====================================================================
