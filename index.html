@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0100">
+<meta name="build" content="2026-08-02-0101">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -886,10 +886,13 @@
             <stop offset="55%"  stop-color="#0c0c0c"/>
             <stop offset="100%" stop-color="#030303"/>
           </radialGradient>
+          <!-- Same structure/width as the compass's innerBezel ring, but
+               a genuinely mid-grey tone (not near-black) so it actually
+               reads as a distinct second colour against the white face. -->
           <radialGradient id="innerBezelR2" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stop-color="#2e2e2e"/>
-            <stop offset="90%"  stop-color="#2a2a2a"/>
-            <stop offset="100%" stop-color="#1b1b1b"/>
+            <stop offset="0%"   stop-color="#7a7a7a"/>
+            <stop offset="90%"  stop-color="#6a6a6a"/>
+            <stop offset="100%" stop-color="#4a4a4a"/>
           </radialGradient>
           <linearGradient id="innerBezelSheenR2" x1="50%" y1="0%" x2="50%" y2="100%">
             <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
@@ -1284,7 +1287,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0100</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0101</div>
   </footer>
 </div>
 
