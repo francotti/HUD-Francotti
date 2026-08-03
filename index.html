@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0090">
+<meta name="build" content="2026-08-02-0091">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -259,6 +259,26 @@
     animation: compassHintPulse 1.6s ease-in-out infinite;
   }
   @keyframes compassHintPulse{ 0%,100% { opacity:.6; } 50% { opacity:1; } }
+
+  /* Yellow "activate compass" action button, overlaid on the compass
+     dial — only shown while iOS's device-orientation permission still
+     needs a real tap to grant. */
+  .compass-permit-btn{
+    display:none;
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%;
+    background:#f2c53d; border:2px solid #8a6a10;
+    align-items:center; justify-content:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.55);
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    z-index:6; padding:0;
+    animation: compassPermitPulse 1.7s ease-in-out infinite;
+  }
+  .compass-permit-btn.show{ display:flex; }
+  @keyframes compassPermitPulse{
+    0%,100% { box-shadow:0 0 0 0 rgba(242,197,61,.55), 0 2px 10px rgba(0,0,0,.55); }
+    50%     { box-shadow:0 0 0 9px rgba(242,197,61,0), 0 2px 10px rgba(0,0,0,.55); }
+  }
 
   /* ---- Nav panel ---- */
   .nav-panel{
@@ -656,6 +676,18 @@
                  filter="url(#plateBrightenW)"/>
         </g>
       </svg>
+      <!-- Shown only while device-orientation permission (iOS 13+) still
+           needs a real tap to grant — requestPermission() is silently
+           denied if called without one, same gesture-requirement issue
+           as the geolocation/audio unlocks elsewhere in this app. Sits
+           on top of the dial on both Scherm 1 and 2 (compassGauge is
+           shared), hides itself the moment permission is granted. -->
+      <button type="button" id="compassPermitBtn" class="compass-permit-btn" aria-label="Activeer kompas">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#241c02" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3.2"/>
+          <path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/>
+        </svg>
+      </button>
     </div>
 
     <!-- ============ SPEED-LIMIT SIGN ============ -->
@@ -1213,7 +1245,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0090</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0091</div>
   </footer>
 </div>
 
@@ -1637,6 +1669,7 @@ const useCompassBtn = document.getElementById("useCompassBtn");
 const compassOffsetRow = document.getElementById("compassOffsetRow");
 const compassOffsetMinus = document.getElementById("compassOffsetMinus");
 const compassOffsetPlus  = document.getElementById("compassOffsetPlus");
+const compassPermitBtn   = document.getElementById("compassPermitBtn");
 const screen2Btn = document.getElementById("screen2Btn");
 const mirrorBtn  = document.getElementById("mirrorBtn");
 const compassOffsetValue = document.getElementById("compassOffsetValue");
@@ -1698,6 +1731,26 @@ async function enableCompass() {
   return { success: true };
 }
 
+// iOS 13+ only grants device-orientation access from a genuine tap —
+// requestPermission() called automatically at boot (as setCompassVisible
+// does) is silently denied there, same gesture-requirement issue as the
+// geolocation/audio unlocks elsewhere. So show a yellow action button on
+// top of the dial whenever that's still the case, on both screens.
+function needsCompassPermission() {
+  return typeof DeviceOrientationEvent !== "undefined"
+      && typeof DeviceOrientationEvent.requestPermission === "function"
+      && !compassActive;
+}
+function updateCompassPermitVisibility() {
+  compassPermitBtn.classList.toggle("show", compassVisible && needsCompassPermission());
+}
+compassPermitBtn.addEventListener("click", () => {
+  enableCompass().then(r => {
+    if (!r.success) setStatus(`— KOMPAS ${r.reason} —`, true);
+    updateCompassPermitVisibility();
+  });
+});
+
 function setCompassVisible(v) {
   compassVisible = v;
   compassGauge.style.display = v ? "" : "none";
@@ -1706,8 +1759,10 @@ function setCompassVisible(v) {
   if (v && !compassActive) {
     enableCompass().then(r => {
       if (!r.success) setStatus(`— KOMPAS ${r.reason} —`, true);
+      updateCompassPermitVisibility();
     });
   }
+  updateCompassPermitVisibility();
 }
 useCompassBtn.addEventListener("click", () => setCompassVisible(!compassVisible));
 if (compassOffsetMinus) compassOffsetMinus.addEventListener("click", () => {
