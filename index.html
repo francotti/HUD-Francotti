@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0094">
+<meta name="build" content="2026-08-02-0095">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1248,7 +1248,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0094</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0095</div>
   </footer>
 </div>
 
@@ -2105,11 +2105,14 @@ function renderSignalQuality(accuracyMeters) {
       stroke: color, "stroke-width": ringStrokeWidth
     }));
     // Same small tick marks as the centre crosshair reticle, out at this
-    // ring's radius, coloured to match the ring.
-    [[200, 200 - r - 5, 200, 200 - r + 5],
-     [200, 200 + r - 5, 200, 200 + r + 5],
-     [200 - r - 5, 200, 200 - r + 5, 200],
-     [200 + r - 5, 200, 200 + r + 5, 200]].forEach(([x1, y1, x2, y2]) => {
+    // ring's radius, coloured to match the ring — except the 3rd ring's
+    // ticks, which instead bridge the gap and connect ring 2 to ring 3.
+    const innerR = i === 2 ? SIGNAL_RING_RADII[1] : r - 5;
+    const outerR = i === 2 ? r : r + 5;
+    [[200, 200 - outerR, 200, 200 - innerR],
+     [200, 200 + innerR, 200, 200 + outerR],
+     [200 - outerR, 200, 200 - innerR, 200],
+     [200 + innerR, 200, 200 + outerR, 200]].forEach(([x1, y1, x2, y2]) => {
       signalRingsEl.appendChild(el("line", {
         x1, y1, x2, y2, stroke: color, "stroke-width": 2, "stroke-linecap": "round"
       }));
