@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0083">
+<meta name="build" content="2026-08-02-0084">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1068,7 +1068,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0083</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0084</div>
   </footer>
 </div>
 
@@ -1687,7 +1687,7 @@ function startWatch() {
   if (!navigator.geolocation) { setStatus("— GEOLOCATIE NIET ONDERSTEUND —", true); return; }
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   watchId = navigator.geolocation.watchPosition(onPosition, onPositionError, {
-    enableHighAccuracy: true, maximumAge: 1000, timeout: 20000
+    enableHighAccuracy: true, maximumAge: 500, timeout: 20000
   });
 }
 useLocBtn.addEventListener("click", () => { setStatus("— LOCATIE AANVRAGEN —"); startWatch(); });
