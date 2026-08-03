@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0108">
+<meta name="build" content="2026-08-02-0109">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1306,7 +1306,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0108</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0109</div>
   </footer>
 </div>
 
@@ -1626,28 +1626,21 @@ function sonarPingA(ctx, now, freq) {
   osc.stop(now + 1.6);
 }
 
-// B — "wobbly underwater sonar" (chosen variant): a single steady pure
-// tone with a slow vibrato for that eerie warble, quick attack, long
-// ring-out — no delay/echo tail, just the one clean ping.
+// B — chosen variant: one single steady pure tone, quick attack, long
+// ring-out. No vibrato (that was a repeating warble) and no delay/echo —
+// just the one clean ping.
 function sonarPingB(ctx, now, freq) {
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = "sine";
   osc.frequency.setValueAtTime(freq, now);
-  const vibrato = ctx.createOscillator();
-  vibrato.type = "sine";
-  vibrato.frequency.value = 5;
-  const vibratoGain = ctx.createGain();
-  vibratoGain.gain.value = freq * 0.015;
-  vibrato.connect(vibratoGain);
-  vibratoGain.connect(osc.frequency);
   gain.gain.setValueAtTime(0.0001, now);
   gain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
   osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.start(now); vibrato.start(now);
-  osc.stop(now + 1.4); vibrato.stop(now + 1.4);
+  osc.start(now);
+  osc.stop(now + 1.4);
 }
 
 // C — "depth-sounder": short sharp pulse, silence, then one distinct
