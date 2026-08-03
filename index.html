@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0099">
+<meta name="build" content="2026-08-02-0100">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -875,24 +875,31 @@
             <circle cx="200" cy="200" r="196" fill="white"/>
             <circle cx="200" cy="200" r="160" fill="black"/>
           </mask>
-          <!-- Inner bezel ring — a genuinely lighter grey (not the other
-               dials' near-black tone, which barely showed against the
-               already-dark outer ring here) so it reads as a clearly
-               distinct second colour, wide enough to actually notice. -->
+          <!-- Everything below is copied verbatim from the compass dial's
+             ring structure (bezelChromeW/faceW/innerBezelW/deepFaceW
+             chain) — same radii, colours, opacities, shadow arcs. Only
+             the innermost surface uses limitFace2 (white) instead of
+             deepFaceW, since digits need to sit on white here. Colours
+             on the copied dark layers to be revisited next. -->
+          <radialGradient id="faceR2" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
           <radialGradient id="innerBezelR2" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stop-color="#5c5c5c"/>
-            <stop offset="90%"  stop-color="#4a4a4a"/>
-            <stop offset="100%" stop-color="#2e2e2e"/>
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
           </radialGradient>
           <linearGradient id="innerBezelSheenR2" x1="50%" y1="0%" x2="50%" y2="100%">
-            <stop offset="0%"   stop-color="rgba(255,255,255,.12)"/>
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
             <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
-            <stop offset="100%" stop-color="rgba(0,0,0,.30)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
           </linearGradient>
           <mask id="innerBezelRingR2">
             <rect width="400" height="400" fill="black"/>
             <circle cx="200" cy="200" r="142" fill="white"/>
-            <circle cx="200" cy="200" r="116" fill="black"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
           </mask>
         </defs>
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeR2)"/>
@@ -901,20 +908,17 @@
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
-        <!-- Outer dark recessed ring + inner (lighter-grey) bezel ring +
-             shadow arcs — same two-tone recessed-bezel structure as the
-             other dials, instead of a single flat dark ring. -->
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceR2)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
         <circle cx="200" cy="200" r="142" fill="url(#innerBezelR2)"/>
         <rect width="400" height="400" fill="url(#innerBezelSheenR2)" mask="url(#innerBezelRingR2)"/>
         <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
-        <circle cx="200" cy="200" r="116" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
-        <circle cx="200" cy="200" r="116" fill="url(#limitFace2)"/>
-        <!-- Shadow sits right against the grey ring's inner edge (116),
-             soft grey (not black) — reads as a shadow cast onto a white
-             surface rather than a hard dark line. -->
-        <path d="M 100 200 A 116 116 0 0 1 316 200" fill="none" stroke="rgba(60,60,60,.28)" stroke-width="10"/>
-        <path d="M 104 200 A 112 112 0 0 1 312 200" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#limitFace2)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
         <!-- Same hand-drawn vintage-gauge digit set as the other dials
              (filled in by renderLimitDigits2() below). -->
         <g id="limitValue2"></g>
@@ -1280,7 +1284,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0099</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0100</div>
   </footer>
 </div>
 
