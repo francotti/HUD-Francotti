@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0081">
+<meta name="build" content="2026-08-02-0082">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1066,7 +1066,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0081</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0082</div>
   </footer>
 </div>
 
@@ -1368,9 +1368,13 @@ function pointSpeedTo(v, opts = {}) {
   speedNeedle.classList.toggle("hot-warn", hot);
   setSpeedGlowState(red, extreme);
   if (extreme) startSiren(); else stopSiren();
+  // Scherm 1: always show the current speed as digits in the dial (same
+  // spot/font/size as the old over-limit-only readout) — green when at
+  // or under the limit (or no limit known), amber/red when over. Hidden
+  // entirely on Scherm 2 via CSS (that screen has its own big number).
   if (red) renderSpeedWarnDigits(v, "#d64545");
   else if (hot) renderSpeedWarnDigits(v, "#ffb347");
-  else clearSpeedWarnDigits();
+  else renderSpeedWarnDigits(v, "#4caf50");
   // Scherm 2's big digit has its own simpler 2-tier scheme, independent
   // of the ring/needle's amber/red/extreme tiers above: 0-4 over the
   // limit = static yellow, >=5 over = slow yellow glow.
