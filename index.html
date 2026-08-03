@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0091">
+<meta name="build" content="2026-08-02-0092">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -262,11 +262,13 @@
 
   /* Yellow "activate compass" action button, overlaid on the compass
      dial — only shown while iOS's device-orientation permission still
-     needs a real tap to grant. */
+     needs a real tap to grant. Sized to match the dial exactly (100% of
+     the .gauge box, which is itself sized responsively via --sm/--sg),
+     not a fixed pixel size, so it always covers the whole dial. */
   .compass-permit-btn{
     display:none;
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:52px; height:52px; border-radius:50%;
+    position:absolute; inset:0;
+    width:100%; height:100%; border-radius:50%;
     background:#f2c53d; border:2px solid #8a6a10;
     align-items:center; justify-content:center;
     box-shadow:0 2px 10px rgba(0,0,0,.55);
@@ -274,6 +276,7 @@
     z-index:6; padding:0;
     animation: compassPermitPulse 1.7s ease-in-out infinite;
   }
+  .compass-permit-btn svg{ width:35%; height:35%; }
   .compass-permit-btn.show{ display:flex; }
   @keyframes compassPermitPulse{
     0%,100% { box-shadow:0 0 0 0 rgba(242,197,61,.55), 0 2px 10px rgba(0,0,0,.55); }
@@ -1245,7 +1248,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0091</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0092</div>
   </footer>
 </div>
 
