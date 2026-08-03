@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0085">
+<meta name="build" content="2026-08-02-0086">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1188,6 +1188,7 @@
       <button class="btn-vintage btn-small" id="testRunBtn">TEST RUN</button>
       <button class="btn-vintage btn-small" id="speedWarnTestBtn">TEST LIMIT WARN</button>
       <button class="btn-vintage btn-small" id="frostTestBtn">TEST FROST</button>
+      <button class="btn-vintage btn-small" id="signalTestBtn">TEST SIGNAL</button>
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
       <button class="btn-vintage btn-small" id="screen2Btn">SCHERM 2</button>
@@ -1198,7 +1199,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0085</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0086</div>
   </footer>
 </div>
 
@@ -1788,7 +1789,8 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 function onPosition(p) {
   const { latitude: lat, longitude: lon, speed, accuracy } = p.coords;
   const t = p.timestamp;
-  renderSignalQuality(typeof accuracy === "number" ? accuracy : null);
+  lastLiveAccuracy = typeof accuracy === "number" ? accuracy : null;
+  if (!signalTestActive) renderSignalQuality(lastLiveAccuracy);
   let kmh;
   if (typeof speed === "number" && speed >= 0) {
     kmh = speed * 3.6;
@@ -1813,7 +1815,8 @@ function onPositionError(err) {
   const reason = err && err.code === 1 ? "DENIED" : err && err.code === 2 ? "UNAVAILABLE" : err && err.code === 3 ? "TIMEOUT" : "ERROR";
   setLocMode(reason);
   setStatus(`— LOCATIE ${reason} —`, true);
-  renderSignalQuality(null); // no usable fix — worst tier
+  lastLiveAccuracy = null;
+  if (!signalTestActive) renderSignalQuality(null); // no usable fix — worst tier
 }
 function startWatch() {
   if (!navigator.geolocation) { setStatus("— GEOLOCATIE NIET ONDERSTEUND —", true); return; }
@@ -2156,6 +2159,35 @@ frostTestBtn.addEventListener("click", () => {
     applyFrostWarnClasses(v);
     i++;
     frostTestTimer = setTimeout(step, FROST_TEST_HOLD_MS);
+  };
+  step();
+});
+
+/* ---------------- TEST SIGNAL — cycle the GPS signal-quality telltale
+   through every tier + its boundaries, including "no fix". ---------------- */
+let lastLiveAccuracy = null;
+const SIGNAL_TEST_STEPS = [5, 15, 16, 50, 51, null]; // metres, null = no fix
+const SIGNAL_TEST_HOLD_MS = 2500;
+let signalTestActive = false, signalTestTimer = null;
+const signalTestBtn = document.getElementById("signalTestBtn");
+function stopSignalTest() {
+  signalTestActive = false;
+  clearTimeout(signalTestTimer);
+  signalTestTimer = null;
+  signalTestBtn.textContent = "TEST SIGNAL";
+  renderSignalQuality(lastLiveAccuracy);
+}
+signalTestBtn.addEventListener("click", () => {
+  if (signalTestActive) { stopSignalTest(); return; }
+  signalTestActive = true;
+  signalTestBtn.textContent = "STOP TEST";
+  let i = 0;
+  const step = () => {
+    if (!signalTestActive) return;
+    if (i >= SIGNAL_TEST_STEPS.length) { stopSignalTest(); return; }
+    renderSignalQuality(SIGNAL_TEST_STEPS[i]);
+    i++;
+    signalTestTimer = setTimeout(step, SIGNAL_TEST_HOLD_MS);
   };
   step();
 });
