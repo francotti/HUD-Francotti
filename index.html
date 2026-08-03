@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0104">
+<meta name="build" content="2026-08-02-0105">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1302,7 +1302,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0104</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0105</div>
   </footer>
 </div>
 
@@ -1586,6 +1586,33 @@ function unlockSirenAudio() {
 }
 document.addEventListener("click", unlockSirenAudio, { once: true });
 document.addEventListener("touchstart", unlockSirenAudio, { once: true, passive: true });
+
+// Sonar-style ping whenever the live speed limit actually changes value
+// (reuses the siren's AudioContext, already unlocked by the tap above).
+// A short sine "blip" with a quick ring-out, pitched up for a higher new
+// limit and down for a lower one — like a sonar return.
+function playLimitChangePing(higher) {
+  const ctx = ensureSirenCtx();
+  if (!ctx) return;
+  try {
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    const now = ctx.currentTime;
+    const startFreq = higher ? 1100 : 480;
+    const endFreq   = higher ? 850  : 340;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(startFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.35);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.42);
+  } catch {}
+}
 
 function pointSpeedTo(v, opts = {}) {
   const clamped = Math.max(SPEED_MIN, Math.min(SPEED_MAX, v));
@@ -2068,9 +2095,15 @@ async function maybeFetchSpeedLimit(lat, lon) {
   lastLimitFetch = now;
   try {
     const { value } = await fetchMaxspeedAt(lat, lon);
+    const prevLimit = currentLimit;
     if (value === Infinity) { currentLimit = null; setLimitValueText("∞"); }
     else if (typeof value === "number") { currentLimit = value; setLimitValueText(String(value)); }
     else { currentLimit = null; setLimitValueText("--"); }
+    // Only ping on a genuine numeric change — not on transitions to/from
+    // "unknown" (--) or "no limit" (∞), where higher/lower isn't defined.
+    if (typeof prevLimit === "number" && typeof currentLimit === "number" && currentLimit !== prevLimit) {
+      playLimitChangePing(currentLimit > prevLimit);
+    }
   } catch { /* keep last known value, silent — public Overpass can be flaky */ }
 }
 
