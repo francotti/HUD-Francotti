@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0087">
+<meta name="build" content="2026-08-02-0088">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1140,12 +1140,27 @@
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
 
         <!-- Crosshair reticle (fixed, neutral) + rings (filled in by
-             renderSignalQuality() below). -->
+             renderSignalQuality() below). Extra tick sets at the
+             midpoints between centre/ring1, ring1/ring2, ring2/ring3
+             (radius 27, 55, 100) give it a proper scope/scale look,
+             always visible regardless of the current tier. -->
         <g stroke="#8a9296" stroke-width="2" stroke-linecap="round">
           <line x1="200" y1="175" x2="200" y2="185"/>
           <line x1="200" y1="215" x2="200" y2="225"/>
           <line x1="175" y1="200" x2="185" y2="200"/>
           <line x1="215" y1="200" x2="225" y2="200"/>
+          <line x1="200" y1="168" x2="200" y2="178"/>
+          <line x1="200" y1="222" x2="200" y2="232"/>
+          <line x1="168" y1="200" x2="178" y2="200"/>
+          <line x1="222" y1="200" x2="232" y2="200"/>
+          <line x1="200" y1="140" x2="200" y2="150"/>
+          <line x1="200" y1="250" x2="200" y2="260"/>
+          <line x1="140" y1="200" x2="150" y2="200"/>
+          <line x1="250" y1="200" x2="260" y2="200"/>
+          <line x1="200" y1="95" x2="200" y2="105"/>
+          <line x1="200" y1="295" x2="200" y2="305"/>
+          <line x1="95" y1="200" x2="105" y2="200"/>
+          <line x1="295" y1="200" x2="305" y2="200"/>
         </g>
         <g id="signalRings" fill="none" stroke-linecap="round"></g>
 
@@ -1199,7 +1214,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0087</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0088</div>
   </footer>
 </div>
 
