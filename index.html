@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0112">
+<meta name="build" content="2026-08-02-0113">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -880,6 +880,19 @@
             <stop offset="70%" stop-color="#f2f2ee"/>
             <stop offset="100%" stop-color="#dedede"/>
           </radialGradient>
+          <!-- Scherm 2: instead of recolouring the digits, the white face
+               itself turns amber (unknown) / blue (no limit) — digits on
+               this sign always stay black. -->
+          <radialGradient id="limitFace2Y" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffdb9e"/>
+            <stop offset="70%" stop-color="#ffc670"/>
+            <stop offset="100%" stop-color="#e0a848"/>
+          </radialGradient>
+          <radialGradient id="limitFace2B" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#a9c6f5"/>
+            <stop offset="70%" stop-color="#7fa8ed"/>
+            <stop offset="100%" stop-color="#4a90e2"/>
+          </radialGradient>
           <radialGradient id="bezelChromeR2" cx="50%" cy="50%" r="50%">
             <stop offset="76%"  stop-color="#000000"/>
             <stop offset="79%"  stop-color="#3a0f0f"/>
@@ -991,7 +1004,7 @@
         <rect width="400" height="400" fill="url(#innerBezelSheenR2)" mask="url(#innerBezelRingR2)"/>
         <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
         <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
-        <circle cx="200" cy="200" r="132" fill="url(#limitFace2)"/>
+        <circle id="limitFace2El" cx="200" cy="200" r="132" fill="url(#limitFace2)"/>
         <!-- Shadow attaches right to the grey ring's inner edge (132,
              not floating inward like the copied dark-face version), soft
              grey rather than black so it reads as a shadow on white. -->
@@ -1366,7 +1379,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0112</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0113</div>
   </footer>
 </div>
 
@@ -2190,9 +2203,12 @@ function renderLimitDigitsInto(targetEl, text, color, y, scale) {
 // reads blue — matching the amber/blue already used elsewhere in the app
 // (over-limit warn / cold telltale).
 function limitDigitColor(kind, isGauge2) {
+  // Scherm 2's digits always stay black — that sign signals state via
+  // its white face colour instead (see setLimitFace2Color below).
+  if (isGauge2) return "#111";
   if (kind === "unknown") return "#ffb347";
   if (kind === "infinite") return "#4a90e2";
-  return isGauge2 ? "#111" : "#d63b3b";
+  return "#d63b3b";
 }
 function renderLimitDigits(text, kind) {
   renderLimitDigitsInto(limitValueEl, text, limitDigitColor(kind, false), 148, LIMIT_DIGIT_SCALE);
@@ -2216,11 +2232,21 @@ function setLimitRingColor(kind) {
   if (limitRingEl)  limitRingEl.setAttribute("fill", fillFor(""));
   if (limitRingEl2) limitRingEl2.setAttribute("fill", fillFor("2"));
 }
-// Renders ring + digits for a given kind/text without touching global
-// state or playing a ping — used for one-off previews (the ZOEK LIMIET
-// address test) and for silently restoring a saved state after a test.
+// Scherm 2's white face itself carries the unknown/no-limit colour
+// (amber/blue) instead of the digits, which stay black there.
+const limitFace2El = document.getElementById("limitFace2El");
+function setLimitFace2Color(kind) {
+  if (!limitFace2El) return;
+  const fill = kind === "unknown" ? "url(#limitFace2Y)" : kind === "infinite" ? "url(#limitFace2B)" : "url(#limitFace2)";
+  limitFace2El.setAttribute("fill", fill);
+}
+// Renders ring + face + digits for a given kind/text without touching
+// global state or playing a ping — used for one-off previews (the ZOEK
+// LIMIET address test) and for silently restoring a saved state after a
+// test.
 function applyLimitDisplay(kind, text) {
   setLimitRingColor(kind);
+  setLimitFace2Color(kind);
   renderLimitDigits(text, kind);
   renderLimitDigits2(text, kind);
 }
