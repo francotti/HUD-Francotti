@@ -186,12 +186,15 @@
   body.mode-screen2 #compassLogo{ display:none; }
   body.mode-screen2 #compassNorthArrow{ display:block; }
 
-  /* "SCHERM 3" — stripped-down minimalist mode: hide any chrome ring
-     that is always neutral silver/chrome (speed/compass/frost/signal),
-     but leave the speed-limit sign's ring alone — its ring IS the
-     coloured state (red=known limit, amber=unknown, blue=no limit), so
-     it stays visible. Also hide every wave/louvre "washboard" band and
-     every Jaeger nameplate logo, on all dials, on both Scherm 1 and 2. */
+  /* "SCHERM 3" — built on Scherm 2's dials (big digital speedo, blue
+     north-arrow compass, big frost digits, white-face limit sign — see
+     setScreen3() below, which forces mode-screen2 on too), with these
+     extra tweaks on top: hide any chrome ring that is always neutral
+     silver/chrome (speed/compass/frost/signal), but leave the
+     speed-limit sign's ring alone — its ring IS the coloured state
+     (red=known limit, amber=unknown, blue=no limit), so it stays
+     visible. Also hide every wave/louvre "washboard" band and every
+     Jaeger nameplate logo, on all dials. */
   body.mode-screen3 #speedBezelRing,
   body.mode-screen3 #compassBezelRing,
   body.mode-screen3 #frostBezelRing,
@@ -1472,7 +1475,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0129</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0130</div>
   </footer>
 </div>
 
@@ -2177,14 +2180,24 @@ mirrorBtn.addEventListener("click", () => setMirror(!document.body.classList.con
 try { setScreen2(localStorage.getItem(SCREEN2_KEY) === "1"); } catch { setScreen2(false); }
 try { setMirror(localStorage.getItem(MIRROR_KEY) === "1"); } catch { setMirror(false); }
 
-// "SCHERM 3" — independent minimalist-look toggle, layers on top of
-// either Scherm 1 or Scherm 2 (hides neutral chrome rings/washboards/
-// logos via the body.mode-screen3 CSS above), same on/off button pattern
-// as screen2Btn.
+// "SCHERM 3" — built on Scherm 2's dials: turning this on forces
+// mode-screen2 on too (so it gets the big digital speedo, blue
+// north-arrow compass, big frost digits, white-face limit sign), then
+// mode-screen3 layers the ring/washboard/logo hiding on top (see CSS
+// above). Remembers whether Scherm 2 was already on before Scherm 3 was
+// switched on, so turning Scherm 3 back off returns to Scherm 1 in that
+// case instead of getting stuck on Scherm 2.
 const screen3Btn = document.getElementById("screen3Btn");
 const SCREEN3_KEY = "hud.screen3";
+let screen2BeforeScreen3 = null;
 function setScreen3(v) {
   document.body.classList.toggle("mode-screen3", v);
+  if (v) {
+    screen2BeforeScreen3 = document.body.classList.contains("mode-screen2");
+    if (!screen2BeforeScreen3) setScreen2(true);
+  } else if (screen2BeforeScreen3 === false) {
+    setScreen2(false);
+  }
   screen3Btn.textContent = v ? "SCHERM 3 UIT" : "SCHERM 3";
   try { localStorage.setItem(SCREEN3_KEY, v ? "1" : "0"); } catch {}
 }
