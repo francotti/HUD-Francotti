@@ -286,6 +286,11 @@
   .speed-warn-digit-glow{ opacity:0; pointer-events:none; }
   #speedWarnDigits.red-warn .speed-warn-digit-glow{ animation: pulseGlow 2.8s ease-in-out infinite; }
 
+  /* Map dial's speed readout: same bright-red pulsing-glow treatment,
+     triggered when more than 5 km/h over the current limit. */
+  .map-speed-glow{ opacity:0; pointer-events:none; }
+  #mapSpeedInfo.red-glow .map-speed-glow{ animation: pulseGlow 2.8s ease-in-out infinite; }
+
   /* Speed-vs-limit escalation, same colours as the Jaeger temp needle's
      hot/red tiers: <5 km/h over = orange (chrome ring + needle), >=5 = red
      (chrome ring + needle), >30 over = whole background + wave band red
@@ -1695,9 +1700,12 @@
              trick as the attribution text, so it stays legible over
              the map regardless of what's underneath. -->
         <g id="mapSpeedInfo" style="pointer-events:none">
-          <text id="mapSpeedText" x="158" y="108" text-anchor="middle" dominant-baseline="central"
-                font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="25.5"
-                fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="2.5"
+          <text id="mapSpeedGlowText" class="map-speed-glow" x="145" y="130" text-anchor="middle"
+                dominant-baseline="central" font-family="Futura, 'Century Gothic', sans-serif"
+                font-weight="700" font-size="40.8" fill="#ff4d4d" filter="url(#coldGlowM)">--</text>
+          <text id="mapSpeedText" x="145" y="130" text-anchor="middle" dominant-baseline="central"
+                font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="40.8"
+                fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="3.5"
                 paint-order="stroke">--</text>
         </g>
 
@@ -1705,17 +1713,19 @@
              scheme as the Scherm 1/2 signs (red=known, amber=unknown,
              blue=no limit), red rim + white/tinted face + black hand-
              drawn digits (same GLYPH font as everywhere else), plus a
-             soft colour-matched glow. 50% bigger and shifted up/right
-             per request, with the speed readout moved to sit at the
-             same height, to its left. Kept in sync via
-             updateMapSpeedInfo() (called from onPosition(), pointSpeedTo()
-             — so it also tracks TEST RUN/TEST LIMIT WARN, not just real
-             GPS — and applyLimitDisplay(), which also covers TEST PING). -->
-        <g id="mapLimitSign" transform="translate(214,108)" style="pointer-events:none">
+             soft colour-matched glow, sized a bit smaller than before
+             per request. Kept in sync via updateMapSpeedInfo() (called
+             from onPosition(), pointSpeedTo() — so it also tracks TEST
+             RUN/TEST LIMIT WARN, not just real GPS — and
+             applyLimitDisplay(), which also covers TEST PING). The
+             speed readout (60% bigger, glows bright red >5 km/h over
+             this limit, same logic/colour as the main speedometer's
+             red tier) sits at the same height, to its left. -->
+        <g id="mapLimitSign" transform="translate(222,130)" style="pointer-events:none">
           <circle id="mapLimitGlow" r="27" fill="#d63b3b" opacity=".5" filter="url(#coldGlowM)"/>
           <circle id="mapLimitFace" r="19.5" fill="url(#limitFaceMapR)" stroke="#d63b3b" stroke-width="6"/>
         </g>
-        <g transform="translate(14,0)"><g id="mapLimitDigits"></g></g>
+        <g transform="translate(22,0)"><g id="mapLimitDigits"></g></g>
 
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
@@ -1779,7 +1789,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0151</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0152</div>
   </footer>
 </div>
 
@@ -3449,7 +3459,9 @@ renderNavGauge({
 const mapImageEl = document.getElementById("mapImage");
 const mapCarIconEl = document.getElementById("mapCarIcon");
 const mapPlaceholderEl = document.getElementById("mapPlaceholder");
+const mapSpeedInfoEl = document.getElementById("mapSpeedInfo");
 const mapSpeedTextEl = document.getElementById("mapSpeedText");
+const mapSpeedGlowTextEl = document.getElementById("mapSpeedGlowText");
 const mapLimitFaceEl = document.getElementById("mapLimitFace");
 const mapLimitGlowEl = document.getElementById("mapLimitGlow");
 const mapLimitDigitsEl = document.getElementById("mapLimitDigits");
@@ -3457,10 +3469,10 @@ let lastCourse = null;
 let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
 const MAP_ZOOM = 16;
-// Same hand-drawn glyphs as the other signs, just much smaller — sized
-// to fit the mini sign's ~39px (50% bigger) face.
-const MAP_LIMIT_DIGIT_SCALE = 1.275;
-const MAP_LIMIT_SIGN_Y = 108; // matches #mapLimitSign's transform above
+// Same hand-drawn glyphs as the other signs — a bit smaller than the
+// sign's very first size, per request.
+const MAP_LIMIT_DIGIT_SCALE = 1.1;
+const MAP_LIMIT_SIGN_Y = 130; // matches #mapLimitSign's transform above
 function mapLimitSignColors(kind) {
   if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
   if (kind === "infinite") return { ring: "#4a90e2", face: "url(#limitFaceMapB)" };
@@ -3485,7 +3497,15 @@ function updateMapSpeedInfo(speedOverride) {
   try {
     const src = typeof speedOverride === "number" ? speedOverride : lastSpeedKmh;
     const kmh = typeof src === "number" ? Math.round(src) : null;
-    mapSpeedTextEl.textContent = kmh === null ? "--" : `${kmh}`;
+    const text = kmh === null ? "--" : `${kmh}`;
+    mapSpeedTextEl.textContent = text;
+    mapSpeedGlowTextEl.textContent = text;
+    // Bright red pulsing glow when more than 5 km/h over the current
+    // limit — same threshold/colour as the main speedometer's red tier.
+    const delta = (kmh !== null && typeof currentLimit === "number") ? kmh - currentLimit : null;
+    const redGlow = delta !== null && delta > 5;
+    mapSpeedInfoEl.classList.toggle("red-glow", redGlow);
+    mapSpeedTextEl.setAttribute("fill", redGlow ? "#ff4d4d" : "rgba(255,255,255,.92)");
     const colors = mapLimitSignColors(limitKind);
     mapLimitFaceEl.setAttribute("fill", colors.face);
     mapLimitFaceEl.setAttribute("stroke", colors.ring);
