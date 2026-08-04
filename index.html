@@ -222,11 +222,10 @@
   body.mode-screen3 #frostFaceRings,
   body.mode-screen3 #signalFaceRings{ display:none; }
 
-  /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
-     than the ring/needle's pulse (2.8s) since this one is meant to read
-     as "slowly" per request. */
+  /* Big digit's glow tier (5-30 km/h over the limit) — bright red, same
+     slower 3.6s pulse as before ("slowly" per the original request). */
   .speed-big-digit-glow{ opacity:0; pointer-events:none; }
-  #speedBigDigits.yellow-glow .speed-big-digit-glow{ animation: pulseGlow 3.6s ease-in-out infinite; }
+  #speedBigDigits.red-glow .speed-big-digit-glow{ animation: pulseGlow 3.6s ease-in-out infinite; }
 
   /* Mirror mode — for mounting the phone in a windshield HUD reflector
      (a glass/mirror combiner): flips the whole dial cluster horizontally,
@@ -260,6 +259,11 @@
      ring red pulse now read the exact same JS-computed opacity value
      every frame, making drift structurally impossible. */
   .needle-red-glow{opacity:0;pointer-events:none;}
+
+  /* Scherm 1's live speed-digit readout: bright red pulsing glow layer,
+     5-30 km/h over the limit — same red family as the needle glow. */
+  .speed-warn-digit-glow{ opacity:0; pointer-events:none; }
+  #speedWarnDigits.red-warn .speed-warn-digit-glow{ animation: pulseGlow 2.8s ease-in-out infinite; }
 
   /* Speed-vs-limit escalation, same colours as the Jaeger temp needle's
      hot/red tiers: <5 km/h over = orange (chrome ring + needle), >=5 = red
@@ -1495,7 +1499,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0133</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0134</div>
   </footer>
 </div>
 
@@ -1627,11 +1631,11 @@ const speedBigDigitsEl  = document.getElementById("speedBigDigits");
 // Scherm 2's big digital speedo readout — same hand-drawn glyph font as
 // the tick numerals/limit sign, always kept up to date (even while
 // hidden on Scherm 1) so it's instantly correct the moment SCHERM 2 is
-// toggled on. Its own simple 2-tier colour scheme (independent of the
-// ring/needle's amber/red/extreme tiers):
-//   "normal"      — plain white, no glow (at/under the limit)
-//   "yellow"      — static yellow (0-4 km/h over)
-//   "yellow-glow" — yellow, slowly pulsing (>=5 km/h over)
+// toggled on. Its own simple 3-tier colour scheme:
+//   "normal"   — plain white, no glow (at/under the limit)
+//   "yellow"   — static amber (0-4 km/h over)
+//   "red-glow" — bright red, slowly pulsing (5-30 km/h over — matches
+//                the Scherm 1 digit readout and needle glow)
 function renderSpeedBigDigits(value, tier) {
   while (speedBigDigitsEl.firstChild) speedBigDigitsEl.removeChild(speedBigDigitsEl.firstChild);
   const chars = String(Math.round(Math.max(0, value))).split("");
@@ -1653,10 +1657,15 @@ function renderSpeedBigDigits(value, tier) {
     });
     return g;
   }
-  const crispColor = tier === "normal" ? "#ffffff" : "#ffd83d";
-  speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-glow", "#ffd83d", GLYPH_STROKE + 2.5, "url(#coldGlowS)"));
+  // "yellow" (0-4 over) stays static amber; "red-glow" (5-30+ over) is
+  // now bright red and glowing, per request — same red as the Scherm 1
+  // digit readout / needle / ring glow elsewhere in the app.
+  const crispColor = tier === "normal" ? "#ffffff" : tier === "yellow" ? "#ffd83d" : "#ff4d4d";
+  const glowColor = tier === "red-glow" ? "#ff4d4d" : "#ffd83d";
+  speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-glow", glowColor, GLYPH_STROKE + 2.5, "url(#coldGlowS)"));
   speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-crisp", crispColor, GLYPH_STROKE, null));
-  speedBigDigitsEl.classList.toggle("yellow-glow", tier === "yellow-glow");
+  speedBigDigitsEl.classList.toggle("yellow-glow", false);
+  speedBigDigitsEl.classList.toggle("red-glow", tier === "red-glow");
   // Shifted up further from y=170 per request — except on Scherm 3,
   // which centres it in the middle of the dial and scales it 70% bigger.
   const screen3 = document.body.classList.contains("mode-screen3");
@@ -1708,8 +1717,10 @@ function setSpeedGlowState(needleOn, ringOn) {
 }
 
 // Same hand-drawn glyph font as the dial numerals, 50% larger, placed
-// lower-right between the numeral ring and the wave band.
-function renderSpeedWarnDigits(value, color) {
+// lower-right between the numeral ring and the wave band. When "glowing"
+// is set (5-30 km/h over the limit), an extra blurred bright-red layer
+// pulses behind the crisp digits — same red/pulse as the needle glow.
+function renderSpeedWarnDigits(value, color, glowing = false) {
   while (speedWarnDigitsEl.firstChild) speedWarnDigitsEl.removeChild(speedWarnDigitsEl.firstChild);
   const chars = String(Math.round(value)).split("");
   const offsets = [0];
@@ -1718,14 +1729,21 @@ function renderSpeedWarnDigits(value, color) {
     offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
   }
   const totalW = offsets[offsets.length - 1];
-  chars.forEach((ch, idx) => {
-    const gx = offsets[idx] - totalW / 2;
-    speedWarnDigitsEl.appendChild(el("path", {
-      d: GLYPH[ch], fill: "none", stroke: color,
-      "stroke-width": GLYPH_STROKE, "stroke-linecap": "round", "stroke-linejoin": "round",
-      transform: `translate(${gx} 0)`
-    }));
-  });
+  function digitGroup(cls, stroke, strokeW, filterAttr) {
+    const g = el("g", filterAttr ? { class: cls, filter: filterAttr } : { class: cls });
+    chars.forEach((ch, idx) => {
+      const gx = offsets[idx] - totalW / 2;
+      g.appendChild(el("path", {
+        d: GLYPH[ch], fill: "none", stroke,
+        "stroke-width": strokeW, "stroke-linecap": "round", "stroke-linejoin": "round",
+        transform: `translate(${gx} 0)`
+      }));
+    });
+    return g;
+  }
+  speedWarnDigitsEl.appendChild(digitGroup("speed-warn-digit-glow", "#ff4d4d", GLYPH_STROKE + 2.5, "url(#coldGlowS)"));
+  speedWarnDigitsEl.appendChild(digitGroup("speed-warn-digit-crisp", color, GLYPH_STROKE, null));
+  speedWarnDigitsEl.classList.toggle("red-warn", glowing);
   speedWarnDigitsEl.setAttribute("transform", "translate(260 198) scale(1.5)");
 }
 function clearSpeedWarnDigits() {
@@ -1925,15 +1943,15 @@ function pointSpeedTo(v, opts = {}) {
   if (extreme) startSiren(); else stopSiren();
   // Scherm 1: always show the current speed as digits in the dial (same
   // spot/font/size as the old over-limit-only readout) — green when at
-  // or under the limit (or no limit known), amber/red when over. Hidden
-  // entirely on Scherm 2 via CSS (that screen has its own big number).
-  if (red) renderSpeedWarnDigits(v, "#d64545");
+  // or under the limit (or no limit known), amber when 0-5 over, bright
+  // red + glowing when 5-30+ over. Hidden entirely on Scherm 2 via CSS
+  // (that screen has its own big number).
+  if (red) renderSpeedWarnDigits(v, "#ff4d4d", true);
   else if (hot) renderSpeedWarnDigits(v, "#ffb347");
   else renderSpeedWarnDigits(v, "#4caf50");
-  // Scherm 2's big digit has its own simpler 2-tier scheme, independent
-  // of the ring/needle's amber/red/extreme tiers above: 0-4 over the
-  // limit = static yellow, >=5 over = slow yellow glow.
-  renderSpeedBigDigits(clamped, red ? "yellow-glow" : (hot ? "yellow" : "normal"));
+  // Scherm 2/3's big digit: 0-4 over the limit = static amber, 5-30+
+  // over = bright red glow (same red as the Scherm 1 readout/needle).
+  renderSpeedBigDigits(clamped, red ? "red-glow" : (hot ? "yellow" : "normal"));
   if (opts.showDigital) speedDigital.textContent = `${v.toFixed(0)}`;
   else if (!testRunActive) speedDigital.textContent = "";
 }
