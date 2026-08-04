@@ -1665,6 +1665,23 @@
               font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
               fill="#4a6d8f">— EERST MAPBOX KEY INSTELLEN —</text>
 
+        <!-- Live speed + speed limit readout, top of the dial — kept in
+             sync with the main speedometer/limit gauges via
+             updateMapSpeedInfo() (called from onPosition() and
+             applyLimitDisplay()). Same dark-outline-behind-light-fill
+             trick as the attribution text, so it stays legible over
+             the map regardless of what's underneath. -->
+        <g id="mapSpeedInfo" style="pointer-events:none">
+          <text id="mapSpeedText" x="200" y="90" text-anchor="middle"
+                font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="17"
+                fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="2"
+                paint-order="stroke">-- km/h</text>
+          <text id="mapLimitText" x="200" y="104" text-anchor="middle"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="9" letter-spacing="1"
+                fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.65)" stroke-width="1.6"
+                paint-order="stroke">LIMIT --</text>
+        </g>
+
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
              from a supplied graphic and recolored red->navy / dark->
@@ -1727,7 +1744,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0148</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0149</div>
   </footer>
 </div>
 
@@ -2582,6 +2599,7 @@ function onPosition(p) {
     lastSpeedKmh = kmh;
     if (!testRunActive && !speedWarnTestActive) pointSpeedTo(kmh);
   }
+  updateMapSpeedInfo();
   setLocMode(`${lat.toFixed(4)}°, ${lon.toFixed(4)}°`);
   maybeFetchSpeedLimit(lat, lon);
   maybeFetchWeather(lat, lon);
@@ -2710,6 +2728,7 @@ function applyLimitDisplay(kind, text) {
   setLimitFace2Color(kind);
   renderLimitDigits(text, kind);
   renderLimitDigits2(text, kind);
+  updateMapSpeedInfo();
 }
 function limitTextFor(kind, value) {
   return kind === "known" ? String(value) : kind === "infinite" ? "∞" : "--";
@@ -3391,10 +3410,29 @@ renderNavGauge({
 const mapImageEl = document.getElementById("mapImage");
 const mapCarIconEl = document.getElementById("mapCarIcon");
 const mapPlaceholderEl = document.getElementById("mapPlaceholder");
+const mapSpeedTextEl = document.getElementById("mapSpeedText");
+const mapLimitTextEl = document.getElementById("mapLimitText");
 let lastCourse = null;
 let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
 const MAP_ZOOM = 16;
+
+/* Keeps the map dial's own speed/limit readout in sync with the main
+   speedometer and limit-sign gauges. Called from onPosition() whenever
+   a fresh speed is computed, and from applyLimitDisplay() whenever the
+   limit-sign state changes (real fetch, restore, or test simulation) —
+   both are the single sources of truth already used elsewhere, so this
+   just mirrors them rather than tracking anything new. Wrapped in
+   try/catch because at boot this can fire before lastSpeedKmh/
+   currentLimit's own declarations have executed (same TDZ edge case as
+   setScreen3's boot-time re-render). */
+function updateMapSpeedInfo() {
+  try {
+    const kmh = typeof lastSpeedKmh === "number" ? Math.round(lastSpeedKmh) : null;
+    mapSpeedTextEl.textContent = kmh === null ? "-- km/h" : `${kmh} km/h`;
+    mapLimitTextEl.textContent = `LIMIT ${limitTextFor(limitKind, currentLimit)}`;
+  } catch { /* referenced state not initialised yet — ignore, next call fixes it */ }
+}
 
 function bearingDeg(lat1, lon1, lat2, lon2) {
   const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
@@ -3444,6 +3482,7 @@ function showDefaultMap() {
   mapCarIconEl.setAttribute("display", "none"); // no real fix yet — no position marker
 }
 showDefaultMap();
+updateMapSpeedInfo();
 
 /* =====================================================================
    FULLSCREEN + WAKE LOCK
