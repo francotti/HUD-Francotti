@@ -1648,27 +1648,18 @@
               font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
               fill="#4a6d8f">— WACHTEN OP KAART —</text>
 
-        <!-- Car marker: dark blue classic Citroen DS 23, plan view, nose
-             up by default — rotated to the current GPS course. -->
-        <!-- Side-profile silhouette (not top-down), per request — nose
-             sloping low and long at the front, arched glasshouse roof,
-             kicked-up tail, two wheels. Drawn nose-right in its natural
-             side-view orientation, then the fixed rotate(-90) turns the
-             nose to point "up" so the outer group's rotate(heading) (set
-             by updateMapGauge() below) still works the same way. -->
+        <!-- Car marker: real photo of a classic Citroen DS 23, side
+             profile, background removed (ds23-icon.png, transparent
+             PNG) — per request, replacing the earlier hand-drawn
+             silhouette. The photo faces left in its native orientation,
+             so the fixed rotate(90) turns the nose to point "up"; the
+             outer group's rotate(heading) (set by updateMapGauge()
+             below) still works the same way on top of that. -->
         <g id="mapCarIcon" transform="translate(200,200) rotate(0)" display="none">
-          <g transform="rotate(-90)">
-            <ellipse cx="3" cy="4" rx="26" ry="9" fill="rgba(0,0,0,.4)"/>
-            <path d="M -20 2 C -22 -2 -21 -6 -17 -8 C -13 -10 -8 -11 -3 -13
-                     C 3 -15.5 9 -16 14 -15 C 18 -14.3 20 -12.5 21.5 -9
-                     C 23 -6 24.5 -3 26 1 C 26.8 2.5 26.5 3.5 25 4
-                     C 20 4.5 14 4.7 8 4.8 L -14 4.8 C -17 4.8 -19 4 -20 2 Z"
-                  fill="#16324a" stroke="#0a1c2c" stroke-width="1"/>
-            <path d="M -10 -9 C -6 -11.5 0 -12.7 6 -13 C 10 -13.2 13.5 -12.6 16 -11
-                     C 15 -9 13 -7.5 10 -6.8 C 4 -6 -3 -6 -8 -7 C -9.5 -7.5 -10 -8.2 -10 -9 Z"
-                  fill="#2c5a82"/>
-            <circle cx="-11" cy="6" r="4.2" fill="#081420"/>
-            <circle cx="17" cy="6" r="4.2" fill="#081420"/>
+          <g transform="rotate(90)">
+            <ellipse cx="0" cy="10" rx="27" ry="7" fill="rgba(0,0,0,.4)"/>
+            <image x="-27" y="-8.5" width="54" height="16.4"
+                   href="ds23-icon.png" preserveAspectRatio="xMidYMid meet"/>
           </g>
         </g>
       </svg>
@@ -1717,7 +1708,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0141</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0142</div>
   </footer>
 </div>
 
