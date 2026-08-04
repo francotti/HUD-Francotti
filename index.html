@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0109">
+<meta name="build" content="2026-08-02-0110">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -721,6 +721,38 @@
             <stop offset="98%"  stop-color="#2a0d0d"/>
             <stop offset="100%" stop-color="#120505"/>
           </radialGradient>
+          <!-- Same banding, re-toned amber — shown instead of the red ring
+               while the live speed limit is unknown (no maxspeed tag found). -->
+          <radialGradient id="bezelChromeY" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#4a2c0a"/>
+            <stop offset="81%"  stop-color="#ffb347"/>
+            <stop offset="83%"  stop-color="#fff6e8"/>
+            <stop offset="85%"  stop-color="#6b3f12"/>
+            <stop offset="87%"  stop-color="#e0a848"/>
+            <stop offset="89%"  stop-color="#4a2c0a"/>
+            <stop offset="91%"  stop-color="#fff6e8"/>
+            <stop offset="93%"  stop-color="#ffb347"/>
+            <stop offset="96%"  stop-color="#f0c890"/>
+            <stop offset="98%"  stop-color="#2e1a06"/>
+            <stop offset="100%" stop-color="#150a03"/>
+          </radialGradient>
+          <!-- Same banding, re-toned blue — shown instead of the red ring
+               when the road has no speed limit (maxspeed=none). -->
+          <radialGradient id="bezelChromeB" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#0f1e3a"/>
+            <stop offset="81%"  stop-color="#4a90e2"/>
+            <stop offset="83%"  stop-color="#eef4ff"/>
+            <stop offset="85%"  stop-color="#1c355c"/>
+            <stop offset="87%"  stop-color="#6892e0"/>
+            <stop offset="89%"  stop-color="#0f1e3a"/>
+            <stop offset="91%"  stop-color="#eef4ff"/>
+            <stop offset="93%"  stop-color="#4a90e2"/>
+            <stop offset="96%"  stop-color="#8ab0e8"/>
+            <stop offset="98%"  stop-color="#0d1a2a"/>
+            <stop offset="100%" stop-color="#050a12"/>
+          </radialGradient>
           <linearGradient id="bezelSheenR" x1="50%" y1="0%" x2="50%" y2="100%">
             <stop offset="0%"   stop-color="rgba(255,235,235,.55)"/>
             <stop offset="32%"  stop-color="rgba(255,235,235,.05)"/>
@@ -789,7 +821,7 @@
             </feComponentTransfer>
           </filter>
         </defs>
-        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeR)"/>
+        <circle id="limitRingChrome" cx="200" cy="200" r="196" fill="url(#bezelChromeR)"/>
         <rect width="400" height="400" fill="url(#bezelSheenR)" mask="url(#bezelRingR)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
@@ -862,6 +894,34 @@
             <stop offset="98%"  stop-color="#2a0d0d"/>
             <stop offset="100%" stop-color="#120505"/>
           </radialGradient>
+          <radialGradient id="bezelChromeY2" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#4a2c0a"/>
+            <stop offset="81%"  stop-color="#ffb347"/>
+            <stop offset="83%"  stop-color="#fff6e8"/>
+            <stop offset="85%"  stop-color="#6b3f12"/>
+            <stop offset="87%"  stop-color="#e0a848"/>
+            <stop offset="89%"  stop-color="#4a2c0a"/>
+            <stop offset="91%"  stop-color="#fff6e8"/>
+            <stop offset="93%"  stop-color="#ffb347"/>
+            <stop offset="96%"  stop-color="#f0c890"/>
+            <stop offset="98%"  stop-color="#2e1a06"/>
+            <stop offset="100%" stop-color="#150a03"/>
+          </radialGradient>
+          <radialGradient id="bezelChromeB2" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#0f1e3a"/>
+            <stop offset="81%"  stop-color="#4a90e2"/>
+            <stop offset="83%"  stop-color="#eef4ff"/>
+            <stop offset="85%"  stop-color="#1c355c"/>
+            <stop offset="87%"  stop-color="#6892e0"/>
+            <stop offset="89%"  stop-color="#0f1e3a"/>
+            <stop offset="91%"  stop-color="#eef4ff"/>
+            <stop offset="93%"  stop-color="#4a90e2"/>
+            <stop offset="96%"  stop-color="#8ab0e8"/>
+            <stop offset="98%"  stop-color="#0d1a2a"/>
+            <stop offset="100%" stop-color="#050a12"/>
+          </radialGradient>
           <linearGradient id="bezelSheenR2" x1="50%" y1="0%" x2="50%" y2="100%">
             <stop offset="0%"   stop-color="rgba(255,235,235,.55)"/>
             <stop offset="32%"  stop-color="rgba(255,235,235,.05)"/>
@@ -917,7 +977,7 @@
             <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
           </linearGradient>
         </defs>
-        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeR2)"/>
+        <circle id="limitRingChrome2" cx="200" cy="200" r="196" fill="url(#bezelChromeR2)"/>
         <rect width="400" height="400" fill="url(#bezelSheenR2)" mask="url(#bezelRingR2)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
@@ -1306,7 +1366,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0109</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0110</div>
   </footer>
 </div>
 
@@ -1522,7 +1582,8 @@ function clearSpeedWarnDigits() {
   while (speedWarnDigitsEl.firstChild) speedWarnDigitsEl.removeChild(speedWarnDigitsEl.firstChild);
 }
 const SPEED_MIN = 0, SPEED_MAX = 220;
-let currentLimit = null; // km/h, or null if unknown
+let currentLimit = null; // km/h, or null if unknown/infinite
+let limitKind = "unknown"; // "unknown" | "known" | "infinite" — drives ring colour + pings
 
 /* ---------------------------------------------------------------------
    Old-fashioned siren, synthesised with Web Audio (no audio asset
@@ -1750,7 +1811,7 @@ const SPEEDWARN_TEST_STEPS   = [0, 30, 31, 34, 35, 50, 60, 80];
 const SPEEDWARN_TEST_LIMIT   = 30;
 const SPEEDWARN_TEST_HOLD_MS = 4000;
 let speedWarnTestActive = false, speedWarnTestTimer = null;
-let savedLimitBeforeWarnTest = null;
+let savedLimitBeforeWarnTest = null; // {kind, value}
 const speedWarnTestBtn = document.getElementById("speedWarnTestBtn");
 
 function stopSpeedWarnTest() {
@@ -1758,8 +1819,10 @@ function stopSpeedWarnTest() {
   clearTimeout(speedWarnTestTimer);
   speedWarnTestTimer = null;
   speedWarnTestBtn.textContent = "TEST LIMIT WARN";
-  currentLimit = savedLimitBeforeWarnTest;
-  setLimitValueText(typeof currentLimit === "number" ? String(currentLimit) : "--");
+  const saved = savedLimitBeforeWarnTest || { kind: "unknown", value: null };
+  limitKind = saved.kind;
+  currentLimit = saved.kind === "known" ? saved.value : null;
+  applyLimitDisplay(limitKind, limitTextFor(limitKind, currentLimit));
   pointSpeedTo(lastSpeedKmh ?? 0, { suppressWarn: false });
   speedDigital.textContent = "";
 }
@@ -1768,9 +1831,10 @@ speedWarnTestBtn.addEventListener("click", () => {
   if (speedWarnTestActive) { stopSpeedWarnTest(); return; }
   speedWarnTestActive = true;
   speedWarnTestBtn.textContent = "STOP TEST";
-  savedLimitBeforeWarnTest = currentLimit;
+  savedLimitBeforeWarnTest = { kind: limitKind, value: currentLimit };
+  limitKind = "known";
   currentLimit = SPEEDWARN_TEST_LIMIT;
-  setLimitValueText(String(SPEEDWARN_TEST_LIMIT));
+  applyLimitDisplay("known", String(SPEEDWARN_TEST_LIMIT));
   let i = 0;
   const step = () => {
     if (!speedWarnTestActive) return;
@@ -2113,21 +2177,83 @@ function renderLimitDigitsInto(targetEl, text, color, y, scale) {
   });
   targetEl.setAttribute("transform", `translate(200 ${y}) scale(${scale})`);
 }
-function renderLimitDigits(text) {
-  renderLimitDigitsInto(limitValueEl, text, "#d63b3b", 148, LIMIT_DIGIT_SCALE);
+// Colour for the sign's readout depends on what kind of value it is:
+// a real number keeps each sign's own default colour, "unknown" (no
+// maxspeed tag found) reads amber, "infinite" (no speed limit at all)
+// reads blue — matching the amber/blue already used elsewhere in the app
+// (over-limit warn / cold telltale).
+function limitDigitColor(kind, isGauge2) {
+  if (kind === "unknown") return "#ffb347";
+  if (kind === "infinite") return "#4a90e2";
+  return isGauge2 ? "#111" : "#d63b3b";
+}
+function renderLimitDigits(text, kind) {
+  renderLimitDigitsInto(limitValueEl, text, limitDigitColor(kind, false), 148, LIMIT_DIGIT_SCALE);
 }
 // Keeps the exact-copy sign (for a future HUD variant) in the same
 // hand-drawn glyph font, dark on its white face, mirroring the same
 // live value as the original everywhere it updates. Numbers here are
 // 2x the original's size per request.
 const LIMIT_DIGIT_SCALE_2 = LIMIT_DIGIT_SCALE * 2;
-function renderLimitDigits2(text) {
-  if (limitValueEl2) renderLimitDigitsInto(limitValueEl2, text, "#111", 200, LIMIT_DIGIT_SCALE_2);
+function renderLimitDigits2(text, kind) {
+  if (limitValueEl2) renderLimitDigitsInto(limitValueEl2, text, limitDigitColor(kind, true), 200, LIMIT_DIGIT_SCALE_2);
 }
-function setLimitValueText(text) {
-  renderLimitDigits(text);
-  renderLimitDigits2(text);
+// Chrome ring colour follows the same 3-way kind: red (known, the
+// original sign look), amber (unknown), blue (no limit at all).
+const limitRingEl  = document.getElementById("limitRingChrome");
+const limitRingEl2 = document.getElementById("limitRingChrome2");
+function setLimitRingColor(kind) {
+  const fillFor = (suffix) => kind === "unknown" ? `url(#bezelChromeY${suffix})`
+                             : kind === "infinite" ? `url(#bezelChromeB${suffix})`
+                             : `url(#bezelChromeR${suffix})`;
+  if (limitRingEl)  limitRingEl.setAttribute("fill", fillFor(""));
+  if (limitRingEl2) limitRingEl2.setAttribute("fill", fillFor("2"));
 }
+// Renders ring + digits for a given kind/text without touching global
+// state or playing a ping — used for one-off previews (the ZOEK LIMIET
+// address test) and for silently restoring a saved state after a test.
+function applyLimitDisplay(kind, text) {
+  setLimitRingColor(kind);
+  renderLimitDigits(text, kind);
+  renderLimitDigits2(text, kind);
+}
+function limitTextFor(kind, value) {
+  return kind === "known" ? String(value) : kind === "infinite" ? "∞" : "--";
+}
+// Sonar ping for a genuine limit-state change:
+//  - known -> known (value changed): one ping, tone = higher/lower.
+//  - unknown -> known, infinite -> known: 2 low pings ("arriving at a
+//    concrete number" reads the same as a decrease).
+//  - known -> unknown, anything -> infinite: 2 high pings ("leaving to a
+//    less specific/open state" reads the same as an increase).
+// unknown <-> infinite directly isn't specified and stays silent.
+const PING_DOUBLE_GAP_MS = 400;
+function playDoublePing(higher) {
+  playLimitChangePing(higher);
+  setTimeout(() => playLimitChangePing(higher), PING_DOUBLE_GAP_MS);
+}
+function playLimitTransitionPing(prevKind, prevValue, newKind, newValue) {
+  if (prevKind === newKind) {
+    if (prevKind === "known" && newValue !== prevValue) playLimitChangePing(newValue > prevValue);
+    return;
+  }
+  if (newKind === "infinite") { playDoublePing(true); return; }
+  if (newKind === "known" && (prevKind === "unknown" || prevKind === "infinite")) { playDoublePing(false); return; }
+  if (newKind === "unknown" && prevKind === "known") { playDoublePing(true); return; }
+}
+// The one entry point for a *real* limit-state change: updates the
+// display, then pings based on the actual prev -> new transition.
+function setLimitState(newKind, newValue) {
+  const prevKind = limitKind, prevValue = currentLimit;
+  limitKind = newKind;
+  currentLimit = newKind === "known" ? newValue : null;
+  applyLimitDisplay(newKind, limitTextFor(newKind, newValue));
+  playLimitTransitionPing(prevKind, prevValue, newKind, newValue);
+}
+// Boot state: no fetch has run yet, so the sign starts "unknown" —
+// amber ring + dashes — rather than the static red ring baked into the
+// markup, and silently (no ping on app startup).
+applyLimitDisplay("unknown", "--");
 let lastLimitFetch = 0;
 // Lowered from 8000 — the old throttle meant crossing into a new speed
 // zone could take up to 8s to show. 4s is still light on the public
@@ -2167,15 +2293,9 @@ async function maybeFetchSpeedLimit(lat, lon) {
   lastLimitFetch = now;
   try {
     const { value } = await fetchMaxspeedAt(lat, lon);
-    const prevLimit = currentLimit;
-    if (value === Infinity) { currentLimit = null; setLimitValueText("∞"); }
-    else if (typeof value === "number") { currentLimit = value; setLimitValueText(String(value)); }
-    else { currentLimit = null; setLimitValueText("--"); }
-    // Only ping on a genuine numeric change — not on transitions to/from
-    // "unknown" (--) or "no limit" (∞), where higher/lower isn't defined.
-    if (typeof prevLimit === "number" && typeof currentLimit === "number" && currentLimit !== prevLimit) {
-      playLimitChangePing(currentLimit > prevLimit);
-    }
+    if (value === Infinity) setLimitState("infinite", null);
+    else if (typeof value === "number") setLimitState("known", value);
+    else setLimitState("unknown", null);
   } catch { /* keep last known value, silent — public Overpass can be flaky */ }
 }
 
@@ -2212,13 +2332,13 @@ limitTestBtn.addEventListener("click", async () => {
     const { value, raw, road } = await fetchMaxspeedAt(loc.lat, loc.lon);
     const roadTxt = road ? ` (${road})` : "";
     if (value === Infinity) {
-      setLimitValueText("∞");
+      applyLimitDisplay("infinite", "∞");
       limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN LIMIET`;
     } else if (typeof value === "number") {
-      setLimitValueText(String(value));
+      applyLimitDisplay("known", String(value));
       limitTestResult.textContent = `${loc.label}${roadTxt} · ${value} KM/H`;
     } else {
-      setLimitValueText("--");
+      applyLimitDisplay("unknown", "--");
       limitTestResult.textContent = `${loc.label}${roadTxt} · GEEN MAXSPEED-TAG${raw ? ` (ruw: ${raw})` : ""}`;
     }
   } catch (e) {
@@ -2449,45 +2569,52 @@ signalTestBtn.addEventListener("click", () => {
   step();
 });
 
-/* ---------------- TEST PING — cycle the speed-limit-change sonar ping
-   through a run of up/down steps so both tones can be heard without
-   waiting for real zone changes while driving. Starts from a silent
-   baseline (no ping on the very first step, matching production, where
-   a jump from "unknown" doesn't ping either), then every following step
-   is a genuine numeric change and pings. ---------------- */
-const PING_TEST_BASELINE = 30;
-const PING_TEST_STEPS = [50, 80, 50, 30, 60]; // each step vs. the previous = one ping
-const PING_TEST_HOLD_MS = 1300;
-let pingTestActive = false, pingTestTimer = null, pingTestSavedLimit = null;
+/* ---------------- TEST PING — walks through every kind of limit-state
+   transition and its ping: unknown -> known (up) -> known (up again) ->
+   no limit -> known (back down) -> known (back down) -> unknown. Each
+   step uses the real setLimitState() path, so ring colour, digit colour
+   and pings all come from the exact same code the live GPS fetch uses. */
+const LIMIT_STATE_TEST_SEQUENCE = [
+  { kind: "known", value: 30 },  // unknown -> known: 2 low pings
+  { kind: "known", value: 50 },  // known -> known, higher: 1 high ping
+  { kind: "infinite" },          // known -> no limit: 2 high pings
+  { kind: "known", value: 50 },  // no limit -> known: 2 low pings
+  { kind: "known", value: 30 },  // known -> known, lower: 1 low ping
+  { kind: "unknown" },           // known -> unknown: 2 high pings
+];
+const LIMIT_STATE_TEST_HOLD_MS = 1500;
+let limitStateTestActive = false, limitStateTestTimer = null, limitStateTestSaved = null;
 const pingTestBtn = document.getElementById("pingTestBtn");
-function stopPingTest() {
-  pingTestActive = false;
-  clearTimeout(pingTestTimer);
-  pingTestTimer = null;
+function stopLimitStateTest() {
+  limitStateTestActive = false;
+  clearTimeout(limitStateTestTimer);
+  limitStateTestTimer = null;
   pingTestBtn.textContent = "TEST PING";
-  currentLimit = pingTestSavedLimit;
-  setLimitValueText(typeof currentLimit === "number" ? String(currentLimit) : "--");
+  const saved = limitStateTestSaved || { kind: "unknown", value: null };
+  limitKind = saved.kind;
+  currentLimit = saved.kind === "known" ? saved.value : null;
+  applyLimitDisplay(limitKind, limitTextFor(limitKind, currentLimit)); // silent restore, no ping
 }
 pingTestBtn.addEventListener("click", () => {
-  if (pingTestActive) { stopPingTest(); return; }
-  pingTestActive = true;
-  pingTestSavedLimit = currentLimit;
+  if (limitStateTestActive) { stopLimitStateTest(); return; }
+  limitStateTestActive = true;
+  limitStateTestSaved = { kind: limitKind, value: currentLimit };
   pingTestBtn.textContent = "STOP TEST";
-  currentLimit = PING_TEST_BASELINE;
-  setLimitValueText(String(PING_TEST_BASELINE));
+  // Silent jump to the test's starting point — setup, not part of the
+  // journey being demonstrated, so it doesn't ping.
+  limitKind = "unknown";
+  currentLimit = null;
+  applyLimitDisplay("unknown", "--");
   let i = 0;
   const step = () => {
-    if (!pingTestActive) return;
-    if (i >= PING_TEST_STEPS.length) { stopPingTest(); return; }
-    const next = PING_TEST_STEPS[i];
-    const prev = currentLimit;
-    currentLimit = next;
-    setLimitValueText(String(next));
-    if (typeof prev === "number" && next !== prev) playLimitChangePing(next > prev);
+    if (!limitStateTestActive) return;
+    if (i >= LIMIT_STATE_TEST_SEQUENCE.length) { stopLimitStateTest(); return; }
+    const s = LIMIT_STATE_TEST_SEQUENCE[i];
+    setLimitState(s.kind, s.value ?? null);
     i++;
-    pingTestTimer = setTimeout(step, PING_TEST_HOLD_MS);
+    limitStateTestTimer = setTimeout(step, LIMIT_STATE_TEST_HOLD_MS);
   };
-  pingTestTimer = setTimeout(step, PING_TEST_HOLD_MS);
+  limitStateTestTimer = setTimeout(step, LIMIT_STATE_TEST_HOLD_MS);
 });
 
 // PING A/B/C — instant up-then-down preview of each synthesis style, and
