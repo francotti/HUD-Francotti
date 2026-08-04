@@ -1648,6 +1648,22 @@
             <circle cx="200" cy="200" r="142" fill="white"/>
             <circle cx="200" cy="200" r="132" fill="black"/>
           </mask>
+          <!-- Fades the inner shadow arc's stroke to transparent at both
+               ends instead of cutting off abruptly — objectBoundingBox
+               (the default) maps x1=0/x2=1 to each path's own left/right
+               ends, so this works for both arc paths below unchanged. -->
+          <linearGradient id="innerShadowFadeM" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"  stop-color="#000" stop-opacity="0"/>
+            <stop offset="12%" stop-color="#000" stop-opacity="1"/>
+            <stop offset="88%" stop-color="#000" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="innerShadowHighlightFadeM" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"  stop-color="#fff" stop-opacity="0"/>
+            <stop offset="12%" stop-color="#fff" stop-opacity=".05"/>
+            <stop offset="88%" stop-color="#fff" stop-opacity=".05"/>
+            <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+          </linearGradient>
           <clipPath id="mapClip">
             <circle cx="200" cy="200" r="132"/>
           </clipPath>
@@ -1702,11 +1718,13 @@
                 style="pointer-events:none"/>
 
         <!-- Inner shadow arcs, same as every other dial's face — drawn on
-             top of the map (low opacity) since this gauge's "face" is the
-             live map image itself rather than a solid deep-face fill. -->
-        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"
+             top of the map since this gauge's "face" is the live map
+             image itself rather than a solid deep-face fill. Solid black
+             (not washed-out grey), fading to transparent at both ends
+             via the gradients above instead of cutting off abruptly. -->
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="url(#innerShadowFadeM)" stroke-width="5"
               style="pointer-events:none"/>
-        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="url(#innerShadowHighlightFadeM)" stroke-width="1"
               style="pointer-events:none"/>
 
         <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="2"/>
@@ -1816,7 +1834,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0155</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0156</div>
   </footer>
 </div>
 
