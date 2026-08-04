@@ -1499,7 +1499,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0134</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0135</div>
   </footer>
 </div>
 
@@ -2199,6 +2199,7 @@ const MIRROR_KEY  = "hud.mirror";
 // its own declaration line throws (temporal dead zone), even via typeof.
 let lastLiveFrostTemp = null;
 let lastLiveAccuracy = null; // same reason — setScreen2 below also re-renders the signal telltale
+let lastSignalTierCount = null; // tracks 1/2/3-ring tier so we can ping only on a real transition into red
 const signalRingsEl = document.getElementById("signalRings");
 const signalStaticTicksEl = document.getElementById("signalStaticTicks");
 const SIGNAL_RING_RADII = [35, 75, 115]; // equal 40-unit spacing between each ring
@@ -2603,6 +2604,14 @@ function renderSignalQuality(accuracyMeters) {
   if (typeof accuracyMeters === "number" && accuracyMeters <= 15) { tierCount = 1; color = "#4caf50"; }
   else if (typeof accuracyMeters === "number" && accuracyMeters <= 50) { tierCount = 2; color = "#ffb347"; }
   else { tierCount = 3; color = "#d64545"; }
+  // Real transition into the red (3-ring) tier: same double-high-ping as
+  // the speed-limit sign leaving to a less-specific/open state. Only
+  // fires on an actual tier change (not the initial boot render, and not
+  // a re-render for the same accuracy triggered by a screen-mode toggle).
+  if (lastSignalTierCount !== null && lastSignalTierCount !== 3 && tierCount === 3) {
+    playDoublePing(false);
+  }
+  lastSignalTierCount = tierCount;
   // Centre crosshair + between-ring tick sets match the same tier colour.
   signalStaticTicksEl.setAttribute("stroke", color);
   // Scherm 2's rings: 3x thicker (18), then 50% thicker again (27) —
