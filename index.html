@@ -91,24 +91,26 @@
   .gauge svg{width:100%;height:100%;display:block;}
   .gauge.gauge-med{ width:var(--sm); height:var(--sm); }
 
-  /* "SCHERM 4" — standalone preview of the navigation dial (see
-     #navGauge markup): hides the normal cluster and shows just this one
-     dial, large and centred, so it can be reviewed on its own before
-     deciding where it lives permanently among the other gauges. */
-  #navGauge{ display:none; }
+  /* "SCHERM 4" — standalone preview of the two navigation dials (see
+     #navGauge / #mapGauge markup): hides the normal cluster and shows
+     just these two, side by side, so they can be reviewed on their own
+     before deciding where they live permanently among the other gauges. */
+  #navGauge, #mapGauge{ display:none; }
   body.mode-screen4 #speedGauge,
   body.mode-screen4 .small-dials{ display:none; }
   body.mode-screen4 .cluster{
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr;
-    grid-template-areas: "nav";
+    grid-template-areas: "nav mapdial";
   }
-  body.mode-screen4 #navGauge{
+  body.mode-screen4 #navGauge,
+  body.mode-screen4 #mapGauge{
     display:block;
-    grid-area: nav;
-    width:min(85vh,85vw);
-    height:min(85vh,85vw);
+    width:min(44vh,44vw);
+    height:min(44vh,44vw);
   }
+  body.mode-screen4 #navGauge{ grid-area: nav; justify-self:end; }
+  body.mode-screen4 #mapGauge{ grid-area: mapdial; justify-self:start; }
 
   /* Phone landscape: more usable height than width, so --sg leans on vh
      harder, plus the safe-area padding/header-hide/footer-collapse needed
@@ -1578,6 +1580,93 @@
         <g id="navLanes"></g>
       </svg>
     </div>
+
+    <!-- ============ MAP (Scherm 4 preview, second dial) ============
+         Same standard chrome ring, no wave/louvre band and no logo (the
+         map image needs the whole face). A live Mapbox static map,
+         north-up, with a dark blue classic Citroen DS 23 silhouette
+         marking the car's own position, rotated to match the current
+         direction of travel (GPS course-over-ground). -->
+    <div class="gauge" id="mapGauge">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bezelChromeM" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenM" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceM" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <mask id="bezelRingM">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+          <clipPath id="mapClip">
+            <circle cx="200" cy="200" r="132"/>
+          </clipPath>
+        </defs>
+        <g id="mapBezelRing">
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenM)" mask="url(#bezelRingM)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceM)"/>
+
+        <!-- Static map image (Mapbox Static Images API), north-up,
+             refreshed as position changes — see updateMapGauge() below. -->
+        <image id="mapImage" x="68" y="68" width="264" height="264"
+               clip-path="url(#mapClip)" preserveAspectRatio="xMidYMid slice"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="2"/>
+
+        <!-- Shown until a Mapbox token + GPS fix are both available. -->
+        <text id="mapPlaceholder" x="200" y="200" text-anchor="middle" dominant-baseline="central"
+              font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
+              fill="#4a6d8f">— WACHTEN OP KAART —</text>
+
+        <!-- Car marker: dark blue classic Citroen DS 23, plan view, nose
+             up by default — rotated to the current GPS course. -->
+        <g id="mapCarIcon" transform="translate(200,200) rotate(0)" display="none">
+          <ellipse cx="0" cy="2" rx="9" ry="23" fill="rgba(0,0,0,.45)"/>
+          <!-- Long sloping nose (direction of travel, "up"), shorter
+               rounded tail — the DS's signature streamlined proportions. -->
+          <path d="M 0 -24 C 3.5 -24 5.5 -19 6.5 -11 C 7.8 -2 8.5 6 8 12
+                   C 7.6 17 5.5 20 0 20 C -5.5 20 -7.6 17 -8 12
+                   C -8.5 6 -7.8 -2 -6.5 -11 C -5.5 -19 -3.5 -24 0 -24 Z"
+                fill="#16324a" stroke="#0a1c2c" stroke-width="1"/>
+          <!-- Greenhouse/cabin, pushed toward the rear behind the long hood. -->
+          <path d="M 0 -6 C 2.8 -6 4.3 -3 4.6 2 C 4.9 7 4.3 11 3 12.5
+                   C 1.5 13.7 -1.5 13.7 -3 12.5 C -4.3 11 -4.9 7 -4.6 2
+                   C -4.3 -3 -2.8 -6 0 -6 Z"
+                fill="#2c5a82"/>
+          <line x1="0" y1="-24" x2="0" y2="-11" stroke="#0a1c2c" stroke-width="0.7"/>
+        </g>
+      </svg>
+    </div>
   </div>
 
   <footer>
@@ -1622,7 +1711,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0139</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0140</div>
   </footer>
 </div>
 
@@ -2456,8 +2545,9 @@ function haversineMeters(lat1, lon1, lat2, lon2) {
 }
 
 function onPosition(p) {
-  const { latitude: lat, longitude: lon, speed, accuracy } = p.coords;
+  const { latitude: lat, longitude: lon, speed, accuracy, heading } = p.coords;
   const t = p.timestamp;
+  const prevPos = lastPos;
   lastLiveAccuracy = typeof accuracy === "number" ? accuracy : null;
   if (!signalTestActive) renderSignalQuality(lastLiveAccuracy);
   let kmh;
@@ -2471,6 +2561,7 @@ function onPosition(p) {
     }
   }
   lastPos = { lat, lon, t };
+  updateMapGauge(lat, lon, heading, prevPos);
   if (typeof kmh === "number" && isFinite(kmh)) {
     lastSpeedKmh = kmh;
     if (!testRunActive && !speedWarnTestActive) pointSpeedTo(kmh);
@@ -3273,6 +3364,54 @@ renderNavGauge({
     { active: false, direction: "right" }
   ]
 });
+
+/* ---------------------------------------------------------------------
+   Map dial (Scherm 4, second dial): Mapbox Static Images API, north-up,
+   centred on the current GPS fix, with a dark blue classic Citroen DS 23
+   icon marking the car's own position, rotated to match the direction
+   of travel. Prefers the GPS coords.heading (course-over-ground); if the
+   device doesn't report one, falls back to the bearing between the last
+   two fixes once the car has moved a few metres. */
+const mapImageEl = document.getElementById("mapImage");
+const mapCarIconEl = document.getElementById("mapCarIcon");
+const mapPlaceholderEl = document.getElementById("mapPlaceholder");
+let lastCourse = null;
+let lastMapFetch = 0;
+const MAP_FETCH_INTERVAL_MS = 5000;
+const MAP_ZOOM = 16;
+
+function bearingDeg(lat1, lon1, lat2, lon2) {
+  const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
+  const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+            Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
+
+function updateMapGauge(lat, lon, headingFromGps, prevPos) {
+  if (typeof headingFromGps === "number" && !isNaN(headingFromGps)) {
+    lastCourse = headingFromGps;
+  } else if (prevPos) {
+    const moved = haversineMeters(prevPos.lat, prevPos.lon, lat, lon);
+    if (moved > 3) lastCourse = bearingDeg(prevPos.lat, prevPos.lon, lat, lon);
+  }
+  if (typeof lastCourse === "number") {
+    mapCarIconEl.setAttribute("transform", `translate(200,200) rotate(${lastCourse})`);
+    mapCarIconEl.setAttribute("display", "block");
+  }
+  const token = getMapboxToken();
+  if (!token) {
+    mapPlaceholderEl.textContent = "— EERST MAPBOX KEY INSTELLEN —";
+    mapPlaceholderEl.style.display = "";
+    return;
+  }
+  const now = Date.now();
+  if (now - lastMapFetch < MAP_FETCH_INTERVAL_MS) return;
+  lastMapFetch = now;
+  const url = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/${lon},${lat},${MAP_ZOOM},0/300x300@2x?access_token=${token}`;
+  mapImageEl.setAttribute("href", url);
+  mapPlaceholderEl.style.display = "none";
+}
 
 /* =====================================================================
    FULLSCREEN + WAKE LOCK
