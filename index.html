@@ -242,6 +242,8 @@
   .btn-vintage:active,.btn-vintage:hover{background:#1f1f1f;border-color:#5a5a5a;color:#e8dcb0;}
   .btn-small{padding:4px 8px;font-size:9px;}
   .compass-offset-row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:8px;}
+  .compass-calib-touch{ cursor:pointer; }
+  .compass-calib-touch:active path{ stroke: #ffd83d !important; }
   .build-stamp{margin-top:10px;font-size:8px;letter-spacing:.42em;color:#3f3f3f;}
 
   .compass-hint{
@@ -677,6 +679,30 @@
                  x="-31.68" y="-21.58" width="63.36" height="31.16"
                  preserveAspectRatio="xMidYMid meet"
                  filter="url(#plateBrightenW)"/>
+        </g>
+
+        <!-- Calibration touchpoints on the chrome ring, middle-left and
+             middle-right (9 o'clock / 3 o'clock). Left nudges the compass
+             90° anti-clockwise, right nudges it 90° clockwise — same
+             action as the −90°/+90° buttons below the dial, just reachable
+             directly on the ring on both Scherm 1 and 2 (compassGauge is
+             shared between the two). A faint engraved chevron marks each
+             spot; the actual hit area is a larger invisible circle. -->
+        <g id="compassCalibLeft" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Kalibreer kompas 90 graden linksom" transform="translate(22,200)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M 5 -8 L -6 0 L 5 8" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M 5 -8 L -6 0 L 5 8" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <g id="compassCalibRight" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Kalibreer kompas 90 graden rechtsom" transform="translate(378,200)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M -5 -8 L 6 0 L -5 8" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M -5 -8 L 6 0 L -5 8" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </svg>
       <!-- Shown only while device-orientation permission (iOS 13+) still
@@ -1380,7 +1406,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0126</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0127</div>
   </footer>
 </div>
 
@@ -2025,12 +2051,18 @@ function setCompassVisible(v) {
   updateCompassPermitVisibility();
 }
 useCompassBtn.addEventListener("click", () => setCompassVisible(!compassVisible));
-if (compassOffsetMinus) compassOffsetMinus.addEventListener("click", () => {
-  compassOffset = Math.max(-180, compassOffset - 90); saveCompassOffset(); updateCompassOffsetDisplay(); applyCompassRotation();
-});
-if (compassOffsetPlus) compassOffsetPlus.addEventListener("click", () => {
-  compassOffset = Math.min(180, compassOffset + 90); saveCompassOffset(); updateCompassOffsetDisplay(); applyCompassRotation();
-});
+function adjustCompassOffset(delta) {
+  compassOffset = Math.max(-180, Math.min(180, compassOffset + delta));
+  saveCompassOffset(); updateCompassOffsetDisplay(); applyCompassRotation();
+}
+if (compassOffsetMinus) compassOffsetMinus.addEventListener("click", () => adjustCompassOffset(-90));
+if (compassOffsetPlus) compassOffsetPlus.addEventListener("click", () => adjustCompassOffset(90));
+// Same calibration, but as direct touchpoints on the dial's chrome ring
+// (middle-left / middle-right) — left = anti-clockwise, right = clockwise.
+const compassCalibLeft  = document.getElementById("compassCalibLeft");
+const compassCalibRight = document.getElementById("compassCalibRight");
+if (compassCalibLeft)  compassCalibLeft.addEventListener("click", () => adjustCompassOffset(-90));
+if (compassCalibRight) compassCalibRight.addEventListener("click", () => adjustCompassOffset(90));
 loadCompassOffset(); updateCompassOffsetDisplay();
 // Compass is ON by default now — only respect a saved "0" if the user
 // explicitly turned it off before; no saved value at all means show it.
