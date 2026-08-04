@@ -1696,14 +1696,13 @@
               font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
               fill="#4a6d8f">— EERST MAPBOX KEY INSTELLEN —</text>
 
-        <!-- Live speed + speed limit readout, top of the dial — kept in
-             sync with the main speedometer/limit gauges via
-             updateMapSpeedInfo() (called from onPosition() and
-             applyLimitDisplay()). Hand-drawn GLYPH digits (same font as
-             every other dial), built by renderMapSpeedDigits() below:
-             a dark outline layer for legibility over the map, plus
-             yellow/red glow layers for the 0-5 / >=5 over-limit tiers. -->
-        <g id="mapSpeedDigits" transform="translate(168 130) scale(2.2)"></g>
+        <!-- Live speed + speed limit readout — kept in sync with the
+             main speedometer/limit gauges via updateMapSpeedInfo()
+             (called from onPosition() and applyLimitDisplay()).
+             Hand-drawn GLYPH digits (same font as every other dial),
+             built by renderMapSpeedDigits() below: yellow/red glow
+             layers for the 0-5 / >=5 over-limit tiers, no outline. -->
+        <g id="mapSpeedDigits" transform="translate(168 116) scale(2.2)"></g>
 
         <!-- Mini speed-limit sign on the map dial — same 3-state colour
              scheme as the Scherm 1/2 signs (red=known, amber=unknown,
@@ -1717,7 +1716,7 @@
              speed readout (60% bigger, glows bright red >5 km/h over
              this limit, same logic/colour as the main speedometer's
              red tier) sits at the same height, to its left. -->
-        <g id="mapLimitSign" transform="translate(228,130)" style="pointer-events:none">
+        <g id="mapLimitSign" transform="translate(228,116)" style="pointer-events:none">
           <circle id="mapLimitGlow" r="27" fill="#d63b3b" opacity=".5" filter="url(#coldGlowM)"/>
           <circle id="mapLimitFace" r="19.5" fill="url(#limitFaceMapR)" stroke="#d63b3b" stroke-width="6"/>
         </g>
@@ -1785,7 +1784,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0153</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0154</div>
   </footer>
 </div>
 
@@ -3466,7 +3465,7 @@ const MAP_ZOOM = 16;
 // Same hand-drawn glyphs as the other signs — a bit smaller than the
 // sign's very first size, per request.
 const MAP_LIMIT_DIGIT_SCALE = 1.1;
-const MAP_LIMIT_SIGN_Y = 130; // matches #mapLimitSign's transform above
+const MAP_LIMIT_SIGN_Y = 116; // matches #mapLimitSign's transform above
 function mapLimitSignColors(kind) {
   if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
   if (kind === "infinite") return { ring: "#4a90e2", face: "url(#limitFaceMapB)" };
@@ -3475,10 +3474,10 @@ function mapLimitSignColors(kind) {
 
 // Map dial's speed readout, hand-drawn GLYPH digits (same font as every
 // other dial) instead of plain SVG text, per request. Same glow-layer
-// pattern as renderSpeedWarnDigits()/frost's tiers: a dark outline layer
-// for legibility over the map, then two normally-invisible blurred glow
-// layers (yellow, red) whose CSS animation is toggled via a class on
-// this group, then the crisp coloured digits on top.
+// pattern as renderSpeedWarnDigits()/frost's tiers: two normally-
+// invisible blurred glow layers (yellow, red) whose CSS animation is
+// toggled via a class on this group, then the crisp coloured digits on
+// top — no outline layer (removed per request).
 function renderMapSpeedDigits(text, tier) {
   while (mapSpeedDigitsEl.firstChild) mapSpeedDigitsEl.removeChild(mapSpeedDigitsEl.firstChild);
   const chars = text.split("");
@@ -3505,7 +3504,6 @@ function renderMapSpeedDigits(text, tier) {
   const crispColor = tier === "red" ? "#ff4d4d" : tier === "yellow" ? "#ffd83d" : "rgba(255,255,255,.92)";
   mapSpeedDigitsEl.appendChild(digitGroup("map-speed-glow-yellow", "#ffd83d", GLYPH_STROKE + 2.5, "url(#coldGlowM)"));
   mapSpeedDigitsEl.appendChild(digitGroup("map-speed-glow-red",    "#ff4d4d", GLYPH_STROKE + 2.5, "url(#coldGlowM)"));
-  mapSpeedDigitsEl.appendChild(digitGroup("map-speed-outline", "rgba(0,0,0,.65)", GLYPH_STROKE + 2.2, null));
   mapSpeedDigitsEl.appendChild(digitGroup("map-speed-crisp", crispColor, GLYPH_STROKE, null));
   mapSpeedDigitsEl.classList.toggle("yellow-glow", tier === "yellow");
   mapSpeedDigitsEl.classList.toggle("red-glow", tier === "red");
