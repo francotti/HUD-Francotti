@@ -110,6 +110,41 @@
     body.footer-hidden footer{ max-height:0;margin:0;overflow:hidden; }
   }
 
+  /* Phone portrait: rearrange into 3 rows so every dial fills the screen
+     edge-to-edge instead of leaving the top/bottom margins the landscape
+     layout's 2-row grid would leave in portrait — signal top-left,
+     speedlimit top-right, speedo centered full-width in the middle,
+     frost bottom-left, compass bottom-right. Same header/footer-hiding
+     and safe-area handling as the landscape block above so the cluster
+     can actually claim the full viewport height. */
+  @media (orientation:portrait){
+    .wrap{
+      --sm: min(44vw, 24vh);
+      --sg: min(94vw, 46vh);
+      padding: max(4px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right))
+               max(4px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+      gap:4px;
+      min-height:100vh; min-height:100dvh;
+      justify-content:center;
+    }
+    header{ display:none; }
+    body.footer-hidden footer{ max-height:0;margin:0;overflow:hidden; }
+    .cluster{
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: var(--sm) var(--sg) var(--sm);
+      grid-template-areas:
+        "signal  limit"
+        "speedo  speedo"
+        "frost   compass";
+      gap:8px 4vw;
+    }
+    #signalGauge{ justify-self:start; }
+    #limitGauge, #limitGauge2{ justify-self:end; }
+    #speedGauge{ justify-self:center; }
+    #frostGauge{ justify-self:start; }
+    #compassGauge{ justify-self:end; }
+  }
+
   /* "SCHERM 2" — a second, hub-mirror-mount source variant on the same
      page: same speed/compass/frost dials, but the plain speed-limit sign
      copy (#limitGauge2, no logo/dark bezel) instead of the dressed-up
@@ -1406,7 +1441,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0127</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0128</div>
   </footer>
 </div>
 
