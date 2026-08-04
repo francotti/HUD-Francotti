@@ -1643,6 +1643,15 @@
                clip-path="url(#mapClip)" preserveAspectRatio="xMidYMid slice"/>
         <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="2"/>
 
+        <!-- Required Mapbox/OpenStreetMap attribution — kept legible
+             over the map's varying brightness via a dark outline
+             behind the light fill (paint-order: stroke). Shown
+             whenever a map (default or live) is visible. -->
+        <text x="200" y="318" text-anchor="middle"
+              font-family="Futura, 'Century Gothic', sans-serif" font-size="6.5" letter-spacing="0"
+              fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.65)" stroke-width="1.6"
+              paint-order="stroke" style="pointer-events:none">© Mapbox © OSM</text>
+
         <!-- Only shown when no Mapbox token is set yet — once a token
              exists, showDefaultMap()/updateMapGauge() always keep a
              map (Netherlands overview, or the live position) behind
@@ -1713,7 +1722,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0146</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0147</div>
   </footer>
 </div>
 
