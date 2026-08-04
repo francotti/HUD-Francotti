@@ -1229,13 +1229,13 @@
              vintage-gauge digit set as the speed dial. Filled in by
              renderFrostTemp() in the script below. -->
         <g id="frostDigits" class="frost-digits"></g>
-        <text id="frostUnit" x="200" y="140" text-anchor="start" dominant-baseline="central"
+        <text id="frostUnit" x="200" y="200" text-anchor="start" dominant-baseline="central"
               font-family="Futura, 'Century Gothic', sans-serif"
               font-size="16.5" fill="#c8d0d3">°C</text>
 
         <!-- Small thermometer glyph, same shape as the Jaeger temp dial's
              thermometer icon, scaled down. -->
-        <g id="frostThermoIcon" transform="translate(200,195) scale(0.65)"
+        <g id="frostThermoIcon" transform="translate(200,140) scale(0.65)"
            stroke="#e6ebed" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path d="M -25,-7 L 14.25,-7 A 12,12 0 1 1 14.25,7 L -25,7 A 7,7 0 0 1 -25,-7 Z"/>
           <path d="M -11,0 L 20,0 A 4,4 0 1 1 27.46,2" fill="none" stroke-width="4.10"/>
@@ -1475,7 +1475,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0130</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0131</div>
   </footer>
 </div>
 
@@ -2585,8 +2585,9 @@ const WEATHER_FETCH_INTERVAL_MS = 10 * 60 * 1000;
 /* Renders the temperature using the same hand-drawn vintage-gauge digit
    set as the speed dial (whole degrees only — the glyph set has no
    decimal point), with a small "°C" placed right after it. Both are
-   positioned as one centred cluster at (200,140), the middle of the
-   dial's upper half.
+   positioned as one centred cluster at (200,200), the true middle of
+   the dial (the thermometer icon moved up to (200,140), the spot the
+   digits used to sit, to stay out of the way).
    The frost gauge's on-screen box (.gauge-med) is smaller than the
    speed gauge's, even though both SVGs share the same 400x400 viewBox,
    so the digits need an extra scale-up to read as the same physical
@@ -2621,8 +2622,9 @@ function renderFrostTemp(value) {
     const clusterW = effTotalW + UNIT_GAP + UNIT_W;
     const startX = 200 - clusterW / 2 + FROST_DIGIT_SHIFT;
     digitsCenterX = startX + effTotalW / 2;
-    centerY = 140;
+    centerY = 200;
     frostUnitEl.setAttribute("x", startX + effTotalW + UNIT_GAP);
+    frostUnitEl.setAttribute("y", 200);
   }
 
   // Same colour as whichever ring tier is currently glowing (cold=blue,
