@@ -1630,6 +1630,24 @@
             <circle cx="200" cy="200" r="196" fill="white"/>
             <circle cx="200" cy="200" r="160" fill="black"/>
           </mask>
+          <!-- Grey shadow ring + inner shadow arcs, same construction as
+               every other dial's face (innerBezel/deepFace chain) — was
+               missing from this gauge, added back per request. -->
+          <radialGradient id="innerBezelM" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenM" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingM">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
           <clipPath id="mapClip">
             <circle cx="200" cy="200" r="132"/>
           </clipPath>
@@ -1667,6 +1685,12 @@
         </g>
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceM)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelM)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenM)" mask="url(#innerBezelRingM)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
 
         <!-- Static map image (Mapbox Static Images API), north-up,
              refreshed as position changes — see updateMapGauge() below. -->
@@ -1676,6 +1700,14 @@
         <!-- Soft green tint over the map, per request. -->
         <circle cx="200" cy="200" r="132" fill="#3fae66" opacity=".16" clip-path="url(#mapClip)"
                 style="pointer-events:none"/>
+
+        <!-- Inner shadow arcs, same as every other dial's face — drawn on
+             top of the map (low opacity) since this gauge's "face" is the
+             live map image itself rather than a solid deep-face fill. -->
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"
+              style="pointer-events:none"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"
+              style="pointer-events:none"/>
 
         <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="2"/>
 
@@ -1784,7 +1816,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0154</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0155</div>
   </footer>
 </div>
 
