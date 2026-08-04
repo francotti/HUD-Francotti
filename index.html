@@ -1475,7 +1475,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0131</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0132</div>
   </footer>
 </div>
 
@@ -1637,8 +1637,12 @@ function renderSpeedBigDigits(value, tier) {
   speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-glow", "#ffd83d", GLYPH_STROKE + 2.5, "url(#coldGlowS)"));
   speedBigDigitsEl.appendChild(digitGroup("speed-big-digit-crisp", crispColor, GLYPH_STROKE, null));
   speedBigDigitsEl.classList.toggle("yellow-glow", tier === "yellow-glow");
-  // Shifted up further from y=170 per request.
-  speedBigDigitsEl.setAttribute("transform", "translate(200 155) scale(6)");
+  // Shifted up further from y=170 per request — except on Scherm 3,
+  // which centres it in the middle of the dial and scales it 70% bigger.
+  const screen3 = document.body.classList.contains("mode-screen3");
+  const bigCenterY = screen3 ? 200 : 155;
+  const bigScale = screen3 ? 6 * 1.7 : 6;
+  speedBigDigitsEl.setAttribute("transform", `translate(200 ${bigCenterY}) scale(${bigScale})`);
 }
 
 /* Needle-red-glow and ring-red-glow are driven by ONE shared JS clock
@@ -2200,6 +2204,17 @@ function setScreen3(v) {
   }
   screen3Btn.textContent = v ? "SCHERM 3 UIT" : "SCHERM 3";
   try { localStorage.setItem(SCREEN3_KEY, v ? "1" : "0"); } catch {}
+  // Frost/speed digit position+scale depend on mode-screen3 too — force
+  // an immediate re-render (setScreen2(true) above is a no-op, and thus
+  // skips its own re-render, when Scherm 2 was already active). Wrapped
+  // in try/catch: at boot this can run before lastSpeedKmh's own
+  // declaration further down the script has executed (temporal dead
+  // zone) — harmless, pointSpeedTo() renders it correctly moments later
+  // from the first GPS/test-run update anyway.
+  try {
+    if (typeof lastLiveFrostTemp === "number") renderFrostTemp(lastLiveFrostTemp);
+    renderSpeedBigDigits(lastSpeedKmh ?? 0, "normal");
+  } catch {}
 }
 screen3Btn.addEventListener("click", () => setScreen3(!document.body.classList.contains("mode-screen3")));
 try { setScreen3(localStorage.getItem(SCREEN3_KEY) === "1"); } catch { setScreen3(false); }
@@ -2607,16 +2622,20 @@ function renderFrostTemp(value) {
   }
   const totalW = offsets[offsets.length - 1];
   const screen2 = document.body.classList.contains("mode-screen2");
+  const screen3 = document.body.classList.contains("mode-screen3");
   // Scherm 2: no unit label to balance against, so just centre on the
   // dial, twice as big, and vertically centred between the wave band
   // (starts ~228) and the open top of the face (~140) => y=184.
-  const scale = screen2 ? FROST_DIGIT_SCALE * 2 : FROST_DIGIT_SCALE;
+  // Scherm 3 (built on Scherm 2): centred in the true middle of the dial
+  // instead, and 70% bigger again, per request.
+  const scale = screen2 ? (screen3 ? FROST_DIGIT_SCALE * 2 * 1.7 : FROST_DIGIT_SCALE * 2) : FROST_DIGIT_SCALE;
   const effTotalW = totalW * scale;
   let digitsCenterX, centerY;
   if (screen2) {
     digitsCenterX = 200;
-    // Shifted up further per request (was 184, then 172, then 160).
-    centerY = 152;
+    // Shifted up further per request (was 184, then 172, then 160) —
+    // except on Scherm 3, which centres it instead.
+    centerY = screen3 ? 200 : 152;
   } else {
     const UNIT_GAP = 18, UNIT_W = 24;
     const clusterW = effTotalW + UNIT_GAP + UNIT_W;
