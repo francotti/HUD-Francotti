@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0113">
+<meta name="build" content="2026-08-02-0114">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1369,6 +1369,7 @@
       <button class="btn-vintage btn-small" id="pingVariantABtn">PING A</button>
       <button class="btn-vintage btn-small" id="pingVariantBBtn">PING B</button>
       <button class="btn-vintage btn-small" id="pingVariantCBtn">PING C</button>
+      <button class="btn-vintage btn-small" id="bigDigitsTestBtn">TEST CIJFERS</button>
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
       <button class="btn-vintage btn-small" id="screen2Btn">SCHERM 2</button>
@@ -1379,7 +1380,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0113</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0114</div>
   </footer>
 </div>
 
@@ -2665,6 +2666,35 @@ function demoPingVariant(variant) {
 document.getElementById("pingVariantABtn").addEventListener("click", () => demoPingVariant("A"));
 document.getElementById("pingVariantBBtn").addEventListener("click", () => demoPingVariant("B"));
 document.getElementById("pingVariantCBtn").addEventListener("click", () => demoPingVariant("C"));
+
+/* ---------------- TEST CIJFERS — cycles Scherm 2's big digital speedo
+   readout through every single digit 0-9, 2s each, so the whole glyph
+   set can be checked at a glance. Restores the real live speed once
+   done (or when stopped early). ---------------- */
+const BIG_DIGITS_TEST_HOLD_MS = 2000;
+let bigDigitsTestActive = false, bigDigitsTestTimer = null;
+const bigDigitsTestBtn = document.getElementById("bigDigitsTestBtn");
+function stopBigDigitsTest() {
+  bigDigitsTestActive = false;
+  clearTimeout(bigDigitsTestTimer);
+  bigDigitsTestTimer = null;
+  bigDigitsTestBtn.textContent = "TEST CIJFERS";
+  pointSpeedTo(lastSpeedKmh ?? 0, { suppressWarn: false });
+}
+bigDigitsTestBtn.addEventListener("click", () => {
+  if (bigDigitsTestActive) { stopBigDigitsTest(); return; }
+  bigDigitsTestActive = true;
+  bigDigitsTestBtn.textContent = "STOP TEST";
+  let i = 0;
+  const step = () => {
+    if (!bigDigitsTestActive) return;
+    if (i >= 10) { stopBigDigitsTest(); return; }
+    renderSpeedBigDigits(i, "normal");
+    i++;
+    bigDigitsTestTimer = setTimeout(step, BIG_DIGITS_TEST_HOLD_MS);
+  };
+  step();
+});
 
 /* =====================================================================
    NAVIGATION — Mapbox geocoding + directions (turn-by-turn MVP).
