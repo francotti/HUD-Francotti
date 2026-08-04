@@ -91,6 +91,25 @@
   .gauge svg{width:100%;height:100%;display:block;}
   .gauge.gauge-med{ width:var(--sm); height:var(--sm); }
 
+  /* "SCHERM 4" — standalone preview of the navigation dial (see
+     #navGauge markup): hides the normal cluster and shows just this one
+     dial, large and centred, so it can be reviewed on its own before
+     deciding where it lives permanently among the other gauges. */
+  #navGauge{ display:none; }
+  body.mode-screen4 #speedGauge,
+  body.mode-screen4 .small-dials{ display:none; }
+  body.mode-screen4 .cluster{
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "nav";
+  }
+  body.mode-screen4 #navGauge{
+    display:block;
+    grid-area: nav;
+    width:min(85vh,85vw);
+    height:min(85vh,85vw);
+  }
+
   /* Phone landscape: more usable height than width, so --sg leans on vh
      harder, plus the safe-area padding/header-hide/footer-collapse needed
      to actually fill a short landscape viewport edge-to-edge. */
@@ -1456,6 +1475,109 @@
       </svg>
     </div>
     </div>
+
+    <!-- ============ NAVIGATION (Scherm 4 preview) ============
+         Standard chrome ring + black-face/shadow-ring stack, same as the
+         other dials, but no wave/louvre band and no Jaeger logo per
+         request. All readout content (icon, instruction, distance, lane
+         guidance) is blue-only. Hidden by default; only shown full-size
+         on Scherm 4 (see CSS/JS below) so it can be reviewed on its own
+         before deciding where it lives permanently. -->
+    <div class="gauge" id="navGauge">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bezelChromeN" cx="50%" cy="50%" r="50%">
+            <stop offset="76%"  stop-color="#000000"/>
+            <stop offset="79%"  stop-color="#222226"/>
+            <stop offset="81%"  stop-color="#c8cfd6"/>
+            <stop offset="83%"  stop-color="#fbfcfe"/>
+            <stop offset="85%"  stop-color="#5a6066"/>
+            <stop offset="87%"  stop-color="#eef2f5"/>
+            <stop offset="89%"  stop-color="#3a4048"/>
+            <stop offset="91%"  stop-color="#fafbfd"/>
+            <stop offset="93%"  stop-color="#7e8690"/>
+            <stop offset="96%"  stop-color="#edf1f4"/>
+            <stop offset="98%"  stop-color="#23262a"/>
+            <stop offset="100%" stop-color="#050508"/>
+          </radialGradient>
+          <linearGradient id="bezelSheenN" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(248,252,255,.62)"/>
+            <stop offset="32%"  stop-color="rgba(248,252,255,.06)"/>
+            <stop offset="48%"  stop-color="rgba(0,0,0,.20)"/>
+            <stop offset="52%"  stop-color="rgba(0,0,0,.42)"/>
+            <stop offset="72%"  stop-color="rgba(180,190,200,.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.72)"/>
+          </linearGradient>
+          <radialGradient id="faceN" cx="50%" cy="45%" r="60%">
+            <stop offset="0%"   stop-color="#151515"/>
+            <stop offset="55%"  stop-color="#0c0c0c"/>
+            <stop offset="100%" stop-color="#030303"/>
+          </radialGradient>
+          <radialGradient id="innerBezelN" cx="200" cy="200" r="142" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#2e2e2e"/>
+            <stop offset="90%"  stop-color="#2a2a2a"/>
+            <stop offset="100%" stop-color="#1b1b1b"/>
+          </radialGradient>
+          <linearGradient id="innerBezelSheenN" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%"   stop-color="rgba(255,255,255,.07)"/>
+            <stop offset="55%"  stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,.28)"/>
+          </linearGradient>
+          <mask id="innerBezelRingN">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="142" fill="white"/>
+            <circle cx="200" cy="200" r="132" fill="black"/>
+          </mask>
+          <radialGradient id="deepFaceN" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
+          <mask id="bezelRingN">
+            <rect width="400" height="400" fill="black"/>
+            <circle cx="200" cy="200" r="196" fill="white"/>
+            <circle cx="200" cy="200" r="160" fill="black"/>
+          </mask>
+        </defs>
+        <g id="navBezelRing">
+        <circle cx="200" cy="200" r="196" fill="url(#bezelChromeN)"/>
+        <rect width="400" height="400" fill="url(#bezelSheenN)" mask="url(#bezelRingN)"/>
+        <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+        <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
+        <g id="navFaceRings">
+        <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+        <circle cx="200" cy="200" r="156" fill="url(#faceN)"/>
+        <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+        <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="142" fill="url(#innerBezelN)"/>
+        <rect width="400" height="400" fill="url(#innerBezelSheenN)" mask="url(#innerBezelRingN)"/>
+        <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+        <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+        <circle cx="200" cy="200" r="132" fill="url(#deepFaceN)"/>
+        <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
+        <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        </g>
+
+        <!-- Maneuver icon, filled in by renderNavGauge() below. -->
+        <g id="navIcon" transform="translate(200,122)" stroke="#4a90e2" stroke-width="6"
+           fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+        <text id="navMainText" x="200" y="205" text-anchor="middle"
+              font-family="Futura, 'Century Gothic', sans-serif" font-size="25" font-weight="500"
+              fill="#9dccff"></text>
+        <text id="navSubText" x="200" y="230" text-anchor="middle"
+              font-family="Futura, 'Century Gothic', sans-serif" font-size="15.5"
+              fill="#4a90e2"></text>
+        <text id="navDistText" x="200" y="252" text-anchor="middle" letter-spacing="1.5"
+              font-family="Futura, 'Century Gothic', sans-serif" font-size="11.5"
+              fill="#4a6d8f"></text>
+        <line x1="112" y1="262" x2="288" y2="262" stroke="#1c3350" stroke-width="1"/>
+        <!-- Lane-guidance row, filled in by renderNavGauge() below. -->
+        <g id="navLanes"></g>
+      </svg>
+    </div>
   </div>
 
   <footer>
@@ -1492,6 +1614,7 @@
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
       <button class="btn-vintage btn-small" id="screen2Btn">SCHERM 2</button>
       <button class="btn-vintage btn-small" id="screen3Btn">SCHERM 3</button>
+      <button class="btn-vintage btn-small" id="screen4Btn">SCHERM 4</button>
       <button class="btn-vintage btn-small" id="mirrorBtn">MIRROR OFF</button>
     </div>
     <div class="compass-offset-row" id="compassOffsetRow" style="display:none;">
@@ -1499,7 +1622,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0136</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0137</div>
   </footer>
 </div>
 
@@ -2260,6 +2383,19 @@ function setScreen3(v) {
 screen3Btn.addEventListener("click", () => setScreen3(!document.body.classList.contains("mode-screen3")));
 try { setScreen3(localStorage.getItem(SCREEN3_KEY) === "1"); } catch { setScreen3(false); }
 
+// "SCHERM 4" — standalone preview toggle for the navigation dial (see
+// #navGauge markup/CSS above). Independent of Scherm 2/3: just swaps the
+// whole cluster for the one nav dial and back.
+const screen4Btn = document.getElementById("screen4Btn");
+const SCREEN4_KEY = "hud.screen4";
+function setScreen4(v) {
+  document.body.classList.toggle("mode-screen4", v);
+  screen4Btn.textContent = v ? "SCHERM 4 UIT" : "SCHERM 4";
+  try { localStorage.setItem(SCREEN4_KEY, v ? "1" : "0"); } catch {}
+}
+screen4Btn.addEventListener("click", () => setScreen4(!document.body.classList.contains("mode-screen4")));
+try { setScreen4(localStorage.getItem(SCREEN4_KEY) === "1"); } catch { setScreen4(false); }
+
 // Swipe left/right anywhere on the page to switch screens — swipe left
 // (finger moves right-to-left) goes to Scherm 2, swipe right goes back to
 // Scherm 1. Ignores mostly-vertical drags/scrolls and short taps.
@@ -3010,6 +3146,116 @@ function navOnPosition(lat, lon) {
     updateNavInstruction();
   }
 }
+
+/* ---------------------------------------------------------------------
+   Scherm 4's navigation dial: blue-only readout — maneuver icon,
+   primary/secondary instruction text, distance caption, and a lane-
+   guidance row. Same shape of data Mapbox's Directions API provides via
+   banner_instructions (maneuver.type/modifier) and its optional
+   sub.components lane array. Populated below with example data for
+   review; wiring it to the live navRoute steps is a follow-up once the
+   look is approved. */
+const navIconEl     = document.getElementById("navIcon");
+const navMainTextEl = document.getElementById("navMainText");
+const navSubTextEl  = document.getElementById("navSubText");
+const navDistTextEl = document.getElementById("navDistText");
+const navLanesEl    = document.getElementById("navLanes");
+const NAV_BLUE = "#4a90e2", NAV_BLUE_BRIGHT = "#9dccff", NAV_BLUE_DIM = "#2a4258";
+
+function buildNavIconElements(type, modifier) {
+  const t = type || "turn", m = modifier || "straight";
+  if (t === "roundabout" || t === "rotary" || t === "roundabout turn" || t === "exit roundabout" || t === "exit rotary") {
+    return [
+      { tag: "circle", attrs: { cx: 0, cy: -8, r: 26 } },
+      { tag: "path", attrs: { d: "M 22 -18 L 40 -30" } },
+      { tag: "path", attrs: { d: "M 34 -38 L 40 -30 L 34 -22" } }
+    ];
+  }
+  if (t === "merge" || t === "fork" || t === "on ramp" || t === "off ramp" || t === "end of road") {
+    return [
+      { tag: "path", attrs: { d: "M -28 25 Q -10 -10 10 -30" } },
+      { tag: "path", attrs: { d: "M 28 25 Q 15 5 10 -30" } },
+      { tag: "path", attrs: { d: "M 0 -45 L 10 -30 L -6 -22" } }
+    ];
+  }
+  if (t === "arrive") {
+    return [
+      { tag: "path", attrs: { d: "M -8 25 L -8 -30" } },
+      { tag: "path", attrs: { d: "M -8 -30 L 22 -18 L -8 -6 Z", fill: NAV_BLUE } }
+    ];
+  }
+  if (/left|uturn/.test(m)) {
+    return [
+      { tag: "path", attrs: { d: "M 30 20 L 30 -10 Q 30 -30 10 -30 L -25 -30" } },
+      { tag: "path", attrs: { d: "M -5 -45 L -30 -30 L -5 -15" } }
+    ];
+  }
+  if (/right/.test(m)) {
+    return [
+      { tag: "path", attrs: { d: "M -30 20 L -30 -10 Q -30 -30 -10 -30 L 25 -30" } },
+      { tag: "path", attrs: { d: "M 5 -45 L 30 -30 L 5 -15" } }
+    ];
+  }
+  return [
+    { tag: "path", attrs: { d: "M 0 25 L 0 -30" } },
+    { tag: "path", attrs: { d: "M -18 -12 L 0 -34 L 18 -12" } }
+  ];
+}
+
+function renderNavGauge(data) {
+  navMainTextEl.textContent = data.mainText || "";
+  navSubTextEl.textContent = data.subText || "";
+  navDistTextEl.textContent = data.distText || "";
+
+  while (navIconEl.firstChild) navIconEl.removeChild(navIconEl.firstChild);
+  buildNavIconElements(data.maneuverType, data.maneuverModifier).forEach(({ tag, attrs }) => {
+    navIconEl.appendChild(el(tag, attrs));
+  });
+
+  while (navLanesEl.firstChild) navLanesEl.removeChild(navLanesEl.firstChild);
+  const lanes = data.lanes || [];
+  if (lanes.length) {
+    const boxW = 28, boxH = 40, gap = 6, boxY = 270;
+    const totalW = lanes.length * boxW + (lanes.length - 1) * gap;
+    const startX = 200 - totalW / 2 + boxW / 2;
+    lanes.forEach((lane, i) => {
+      const cx = startX + i * (boxW + gap);
+      const stroke = lane.active ? NAV_BLUE : NAV_BLUE_DIM;
+      navLanesEl.appendChild(el("rect", {
+        x: cx - boxW / 2, y: boxY, width: boxW, height: boxH, rx: 3,
+        fill: "none", stroke, "stroke-width": 1.4
+      }));
+      const dir = lane.direction || "straight";
+      const shaftD = dir === "left" ? `M ${cx + 7} ${boxY + boxH - 6} L ${cx + 7} ${boxY + 10} Q ${cx + 7} ${boxY + 2} ${cx - 1} ${boxY + 2} L ${cx - 8} ${boxY + 2}`
+                   : dir === "right" ? `M ${cx - 7} ${boxY + boxH - 6} L ${cx - 7} ${boxY + 10} Q ${cx - 7} ${boxY + 2} ${cx + 1} ${boxY + 2} L ${cx + 8} ${boxY + 2}`
+                   : `M ${cx} ${boxY + boxH - 6} L ${cx} ${boxY + 6}`;
+      const headD  = dir === "left" ? `M ${cx - 4} ${boxY - 4} L ${cx - 10} ${boxY + 2} L ${cx - 4} ${boxY + 8}`
+                   : dir === "right" ? `M ${cx + 4} ${boxY - 4} L ${cx + 10} ${boxY + 2} L ${cx + 4} ${boxY + 8}`
+                   : `M ${cx - 6} ${boxY + 14} L ${cx} ${boxY + 4} L ${cx + 6} ${boxY + 14}`;
+      [shaftD, headD].forEach(d => {
+        navLanesEl.appendChild(el("path", {
+          d, fill: "none", stroke, "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round"
+        }));
+      });
+    });
+  }
+}
+
+// Example content so Scherm 4 shows something meaningful right away —
+// swap for real navRoute step data once the look is confirmed.
+renderNavGauge({
+  mainText: "Turn right",
+  subText: "onto A10 afrit 12",
+  distText: "OVER 250 M",
+  maneuverType: "turn",
+  maneuverModifier: "right",
+  lanes: [
+    { active: false, direction: "straight" },
+    { active: true,  direction: "straight" },
+    { active: true,  direction: "right" },
+    { active: false, direction: "right" }
+  ]
+});
 
 /* =====================================================================
    FULLSCREEN + WAKE LOCK
