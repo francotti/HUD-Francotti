@@ -1643,10 +1643,13 @@
                clip-path="url(#mapClip)" preserveAspectRatio="xMidYMid slice"/>
         <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.6)" stroke-width="2"/>
 
-        <!-- Shown until a Mapbox token + GPS fix are both available. -->
+        <!-- Only shown when no Mapbox token is set yet — once a token
+             exists, showDefaultMap()/updateMapGauge() always keep a
+             map (Netherlands overview, or the live position) behind
+             this and hide it. -->
         <text id="mapPlaceholder" x="200" y="200" text-anchor="middle" dominant-baseline="central"
               font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
-              fill="#4a6d8f">— WACHTEN OP KAART —</text>
+              fill="#4a6d8f">— EERST MAPBOX KEY INSTELLEN —</text>
 
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
@@ -1710,7 +1713,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0144</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0145</div>
   </footer>
 </div>
 
@@ -3411,6 +3414,29 @@ function updateMapGauge(lat, lon, headingFromGps, prevPos) {
   mapImageEl.setAttribute("href", url);
   mapPlaceholderEl.style.display = "none";
 }
+
+/* Default view shown before a real GPS fix arrives (or if it never
+   does — permission denied, no signal, etc.): a static overview map
+   centered on the Netherlands instead of a blank placeholder. Any
+   later real fix from onPosition()/updateMapGauge() simply overwrites
+   this with the live position, and shows the direction marker on
+   top of it — this only covers the "no GPS yet" gap. */
+const NL_DEFAULT_CENTER = { lat: 52.1326, lon: 5.2913 };
+const NL_DEFAULT_ZOOM = 6.3;
+function showDefaultMap() {
+  const token = getMapboxToken();
+  if (!token) {
+    mapPlaceholderEl.textContent = "— EERST MAPBOX KEY INSTELLEN —";
+    mapPlaceholderEl.style.display = "";
+    return;
+  }
+  const url = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/` +
+    `${NL_DEFAULT_CENTER.lon},${NL_DEFAULT_CENTER.lat},${NL_DEFAULT_ZOOM},0/300x300@2x?access_token=${token}`;
+  mapImageEl.setAttribute("href", url);
+  mapPlaceholderEl.style.display = "none";
+  mapCarIconEl.setAttribute("display", "none"); // no real fix yet — no position marker
+}
+showDefaultMap();
 
 /* =====================================================================
    FULLSCREEN + WAKE LOCK
