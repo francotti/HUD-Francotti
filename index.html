@@ -185,6 +185,28 @@
   body.mode-screen2 #compassMiniRose,
   body.mode-screen2 #compassLogo{ display:none; }
   body.mode-screen2 #compassNorthArrow{ display:block; }
+
+  /* "SCHERM 3" — stripped-down minimalist mode: hide any chrome ring
+     that is always neutral silver/chrome (speed/compass/frost/signal),
+     but leave the speed-limit sign's ring alone — its ring IS the
+     coloured state (red=known limit, amber=unknown, blue=no limit), so
+     it stays visible. Also hide every wave/louvre "washboard" band and
+     every Jaeger nameplate logo, on all dials, on both Scherm 1 and 2. */
+  body.mode-screen3 #speedBezelRing,
+  body.mode-screen3 #compassBezelRing,
+  body.mode-screen3 #frostBezelRing,
+  body.mode-screen3 #signalBezelRing{ display:none; }
+  body.mode-screen3 #speedLouver,
+  body.mode-screen3 #compassLouver,
+  body.mode-screen3 #limitLouver,
+  body.mode-screen3 #frostLouver,
+  body.mode-screen3 #signalLouver{ display:none; }
+  body.mode-screen3 #speedLogo,
+  body.mode-screen3 #compassLogo,
+  body.mode-screen3 #limitLogo,
+  body.mode-screen3 #frostLogo,
+  body.mode-screen3 #signalLogo{ display:none; }
+
   /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
      than the ring/needle's pulse (2.8s) since this one is meant to read
      as "slowly" per request. */
@@ -455,12 +477,14 @@
             </feComponentTransfer>
           </filter>
         </defs>
+        <g id="speedBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeS)"/>
         <rect width="400" height="400" fill="url(#bezelSheenS)" mask="url(#bezelRingS)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
 
         <!-- Chrome-rim over-limit glow: orange <5 km/h over the speed
              limit, red >=5 km/h over. -->
@@ -538,7 +562,7 @@
         </g>
 
         <!-- Jaeger nameplate, same image/position/filters as the original dials. -->
-        <g transform="translate(200,285)" filter="url(#plateShadowS)">
+        <g id="speedLogo" transform="translate(200,285)" filter="url(#plateShadowS)">
           <image href="jaeger-logo.png"
                  x="-31.68" y="-21.58" width="63.36" height="31.16"
                  preserveAspectRatio="xMidYMid meet"
@@ -647,12 +671,14 @@
             <feGaussianBlur in="SourceGraphic" stdDeviation="1.4"/>
           </filter>
         </defs>
+        <g id="compassBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeW)"/>
         <rect width="400" height="400" fill="url(#bezelSheenW)" mask="url(#bezelRingW)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceW)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -921,7 +947,7 @@
         </g>
 
         <!-- Jaeger nameplate, same height/size as the other dials. -->
-        <g transform="translate(200,290)" filter="url(#plateShadowR)">
+        <g id="limitLogo" transform="translate(200,290)" filter="url(#plateShadowR)">
           <image href="jaeger-logo.png"
                  x="-31.68" y="-21.58" width="63.36" height="31.16"
                  preserveAspectRatio="xMidYMid meet"
@@ -1164,12 +1190,14 @@
             </feComponentTransfer>
           </filter>
         </defs>
+        <g id="frostBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeF)"/>
         <rect width="400" height="400" fill="url(#bezelSheenF)" mask="url(#bezelRingF)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
 
         <!-- Chrome-rim warning glow, same colours/thresholds as the Jaeger
              temp-dial needle (cold <3°C, hot >25°C, red >30°C). Masked to
@@ -1247,7 +1275,7 @@
         </g>
 
         <!-- Jaeger nameplate, same height as the compass dial. -->
-        <g transform="translate(200,290)" filter="url(#plateShadowF)">
+        <g id="frostLogo" transform="translate(200,290)" filter="url(#plateShadowF)">
           <image href="jaeger-logo.png"
                  x="-31.68" y="-21.58" width="63.36" height="31.16"
                  preserveAspectRatio="xMidYMid meet"
@@ -1344,12 +1372,14 @@
             </feComponentTransfer>
           </filter>
         </defs>
+        <g id="signalBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeG)"/>
         <rect width="400" height="400" fill="url(#bezelSheenG)" mask="url(#bezelRingG)"/>
         <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+        </g>
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceG)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -1390,7 +1420,7 @@
           <rect x="60" y="228" width="280" height="104" fill="url(#wavePatternG)" clip-path="url(#waveClipG)"/>
         </g>
 
-        <g transform="translate(200,290)" filter="url(#plateShadowG)">
+        <g id="signalLogo" transform="translate(200,290)" filter="url(#plateShadowG)">
           <image href="jaeger-logo.png"
                  x="-31.68" y="-21.58" width="63.36" height="31.16"
                  preserveAspectRatio="xMidYMid meet"
@@ -1434,6 +1464,7 @@
       <button class="btn-vintage btn-small" id="useCompassBtn">COMPASS ON</button>
       <button class="btn-vintage btn-small" id="mapboxKeyBtn">MAPBOX KEY</button>
       <button class="btn-vintage btn-small" id="screen2Btn">SCHERM 2</button>
+      <button class="btn-vintage btn-small" id="screen3Btn">SCHERM 3</button>
       <button class="btn-vintage btn-small" id="mirrorBtn">MIRROR OFF</button>
     </div>
     <div class="compass-offset-row" id="compassOffsetRow" style="display:none;">
@@ -1441,7 +1472,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0128</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0129</div>
   </footer>
 </div>
 
@@ -2145,6 +2176,20 @@ screen2Btn.addEventListener("click", () => setScreen2(!document.body.classList.c
 mirrorBtn.addEventListener("click", () => setMirror(!document.body.classList.contains("mirror-on")));
 try { setScreen2(localStorage.getItem(SCREEN2_KEY) === "1"); } catch { setScreen2(false); }
 try { setMirror(localStorage.getItem(MIRROR_KEY) === "1"); } catch { setMirror(false); }
+
+// "SCHERM 3" — independent minimalist-look toggle, layers on top of
+// either Scherm 1 or Scherm 2 (hides neutral chrome rings/washboards/
+// logos via the body.mode-screen3 CSS above), same on/off button pattern
+// as screen2Btn.
+const screen3Btn = document.getElementById("screen3Btn");
+const SCREEN3_KEY = "hud.screen3";
+function setScreen3(v) {
+  document.body.classList.toggle("mode-screen3", v);
+  screen3Btn.textContent = v ? "SCHERM 3 UIT" : "SCHERM 3";
+  try { localStorage.setItem(SCREEN3_KEY, v ? "1" : "0"); } catch {}
+}
+screen3Btn.addEventListener("click", () => setScreen3(!document.body.classList.contains("mode-screen3")));
+try { setScreen3(localStorage.getItem(SCREEN3_KEY) === "1"); } catch { setScreen3(false); }
 
 // Swipe left/right anywhere on the page to switch screens — swipe left
 // (finger moves right-to-left) goes to Scherm 2, swipe right goes back to
