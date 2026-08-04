@@ -1648,18 +1648,20 @@
               font-family="Futura, 'Century Gothic', sans-serif" font-size="13" letter-spacing="1"
               fill="#4a6d8f">— WACHTEN OP KAART —</text>
 
-        <!-- Car marker: real photo of a classic Citroen DS 23, side
-             profile, background removed (ds23-icon.png, transparent
-             PNG) — per request, replacing the earlier hand-drawn
-             silhouette. The photo faces left in its native orientation,
-             so the fixed rotate(90) turns the nose to point "up"; the
-             outer group's rotate(heading) (set by updateMapGauge()
-             below) still works the same way on top of that. -->
+        <!-- Position/heading marker: navy-blue chevron arrow icon
+             (nav-arrow-icon.png, transparent PNG, background removed
+             from a supplied graphic and recolored red->navy / dark->
+             black) — replaces the earlier DS23 photo marker per
+             request. The arrow's nose points right in its native
+             orientation, so the fixed rotate(-90) turns the nose to
+             point "up"; the outer group's rotate(heading) (set by
+             updateMapGauge() below) still works the same way on top
+             of that. -->
         <g id="mapCarIcon" transform="translate(200,200) rotate(0)" display="none">
-          <g transform="rotate(90)">
-            <ellipse cx="0" cy="10" rx="27" ry="7" fill="rgba(0,0,0,.4)"/>
-            <image x="-27" y="-8.5" width="54" height="16.4"
-                   href="ds23-icon.png" preserveAspectRatio="xMidYMid meet"/>
+          <g transform="rotate(-90)">
+            <ellipse cx="0" cy="6" rx="22" ry="5" fill="rgba(0,0,0,.4)"/>
+            <image x="-27" y="-4.1" width="54" height="8.1"
+                   href="nav-arrow-icon.png" preserveAspectRatio="xMidYMid meet"/>
           </g>
         </g>
       </svg>
@@ -1708,7 +1710,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0143</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0144</div>
   </footer>
 </div>
 
