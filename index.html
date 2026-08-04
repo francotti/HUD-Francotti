@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0114">
+<meta name="build" content="2026-08-02-0115">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1380,7 +1380,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0114</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0115</div>
   </footer>
 </div>
 
@@ -1431,13 +1431,17 @@ const GLYPH = {
   '0': 'M -3.0 -5.4 L -3.0 5.4 A 3.0 3.0 0 0 0 3.0 5.4 L 3.0 -5.4 A 3.0 3.0 0 0 0 -3.0 -5.4 Z',
   '1': 'M -1.56 -5.52 L 0 -8.4 L 0 8.4',
   '2': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -2.4 1.44 0 L -2.76 5.52 L -2.76 8.4 L 2.76 8.4',
-  '3': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -2.4 0.96 -0.48 L -0.24 -0.48 M -0.24 0.48 L 0.96 0.48 Q 2.76 2.4 2.76 5.52 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.76 8.4 -2.76 5.52',
+  // 3, 8 and 9's horizontal middle element is aligned to the same y=0.48
+  // level as 5's crossbar (was: 3 at ∓0.48 centred on 0, 8's waist at 0,
+  // 9's loop-bottom shelf at -1.2) — for a consistent "waist height"
+  // across every digit that has one.
+  '3': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -1.92 0.96 0 L -0.24 0 M -0.24 0.96 L 0.96 0.96 Q 2.76 2.88 2.76 5.52 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.76 8.4 -2.76 5.52',
   '4': 'M 1.4 8.4 L 1.4 -8.4 L -2.76 3.8 L 2.76 3.8',
   '5': 'M 2.76 -8.4 L -2.76 -8.4 L -2.76 0.48 L -0.24 0.48 Q 2.76 0.48 2.76 4.8 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.64 8.4 -2.76 6.48',
   '6': 'M 2.2 -8.0 Q -2.76 -8.4 -2.76 -2.0 L -2.76 3.2 Q -2.76 8.4 0.6 8.4 Q 2.76 8.4 2.76 4.8 Q 2.76 1.2 0.2 1.2 Q -1.8 1.2 -2.6 3.0',
   '7': 'M -2.76 -8.4 L 2.76 -8.4 L -0.6 8.4',
-  '8': 'M 0 0 Q -2.76 0 -2.76 -3.6 Q -2.76 -8.4 0 -8.4 Q 2.76 -8.4 2.76 -3.6 Q 2.76 0 0 0 Q -2.76 0 -2.76 3.9 Q -2.76 8.4 0 8.4 Q 2.76 8.4 2.76 3.9 Q 2.76 0 0 0 Z',
-  '9': 'M -2.2 8.0 Q 2.76 8.4 2.76 2.0 L 2.76 -3.2 Q 2.76 -8.4 -0.6 -8.4 Q -2.76 -8.4 -2.76 -4.8 Q -2.76 -1.2 -0.2 -1.2 Q 1.8 -1.2 2.6 -3.0'
+  '8': 'M 0 0.48 Q -2.76 0.48 -2.76 -3.12 Q -2.76 -8.4 0 -8.4 Q 2.76 -8.4 2.76 -3.12 Q 2.76 0.48 0 0.48 Q -2.76 0.48 -2.76 4.38 Q -2.76 8.4 0 8.4 Q 2.76 8.4 2.76 4.38 Q 2.76 0.48 0 0.48 Z',
+  '9': 'M -2.2 8.0 Q 2.76 8.4 2.76 2.0 L 2.76 -3.2 Q 2.76 -8.4 -0.6 -8.4 Q -2.76 -8.4 -2.76 -4.8 Q -2.76 0.48 -0.2 0.48 Q 1.8 0.48 2.6 -3.0'
 };
 const PITCH_WIDE = 12.5, PITCH_NARROW = 10.5, GLYPH_STROKE = 2.9;
 
