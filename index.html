@@ -23,7 +23,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="build" content="2026-08-02-0118">
+<meta name="build" content="2026-08-02-0119">
 
 <style>
   /* ================= Base — same vintage-instrument look as Jaeger ================= */
@@ -1380,7 +1380,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0118</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-02-0119</div>
   </footer>
 </div>
 
@@ -1432,11 +1432,13 @@ const GLYPH = {
   '1': 'M -1.56 -5.52 L 0 -8.4 L 0 8.4',
   '2': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -2.4 1.44 0 L -2.76 5.52 L -2.76 8.4 L 2.76 8.4',
   // 3, 5, 6, 8 and 9's horizontal middle element all sit at y=3.8 — the
-  // same level as 4's crossbar. Redone with a local shift near each
-  // digit's own pinch (control points nudged only enough to stay
-  // monotonic) rather than rescaling the whole upper/lower half — the
-  // earlier full-rescale version made 3/5/8 read as too bottom-heavy.
-  '3': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -2.4 0.96 3.32 L -0.24 3.32 M -0.24 4.28 L 0.96 4.28 Q 2.76 4.9 2.76 5.52 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.76 8.4 -2.76 5.52',
+  // same level as 4's crossbar. At the real stroke width (2.9) the
+  // measure that actually reads consistently isn't the raw coordinate
+  // but the BOTTOM EDGE of the visible bar/notch (coordinate + half the
+  // stroke width) — 3's own bottom edge sat ~0.5 lower than 4/5/6/8's
+  // (its two pinch segments plus follow-on curve pushed it down), fixed
+  // by nudging the lower pinch segment and its curve up to match.
+  '3': 'M -2.76 -5.52 Q -2.76 -8.4 -1.08 -8.4 L 1.08 -8.4 Q 2.76 -8.4 2.76 -5.52 Q 2.76 -2.4 0.96 3.32 L -0.24 3.32 M -0.24 3.78 L 0.96 3.78 Q 2.76 4.4 2.76 5.52 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.76 8.4 -2.76 5.52',
   '4': 'M 1.4 8.4 L 1.4 -8.4 L -2.76 3.8 L 2.76 3.8',
   '5': 'M 2.76 -8.4 L -2.76 -8.4 L -2.76 3.8 L -0.24 3.8 Q 2.76 3.8 2.76 4.8 Q 2.76 8.4 1.08 8.4 L -1.08 8.4 Q -2.64 8.4 -2.76 6.48',
   '6': 'M 2.2 -8 Q -2.76 -5 -2.76 -2 L -2.76 3.2 Q -2.76 8.4 0.6 8.4 Q 2.76 8.4 2.76 4.8 Q 2.76 3.8 0.2 3.8 Q -1.8 3.8 -2.6 3',
