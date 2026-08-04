@@ -534,10 +534,10 @@
               font-family="Futura, 'Century Gothic', sans-serif"
               font-size="13" fill="#c8b880" opacity="0.92"></text>
 
-        <!-- Over-limit speed readout: appears only while hot-warn/over-limit
-             is active, same hand-drawn glyph font as the dial numerals
-             (50% larger), coloured to match the current glow tier. Sits
-             lower-right, between the numeral ring and the wave band. -->
+        <!-- Live speed readout (Scherm 1): same hand-drawn glyph font as
+             the dial numerals, coloured to match the current glow tier
+             (green/amber/red). Centred on the dial, same spot as the
+             frost gauge's temperature — see renderSpeedWarnDigits(). -->
         <g id="speedWarnDigits"></g>
 
         <!-- SCHERM 2 only: one big white digital speed readout, hand-drawn
@@ -1475,7 +1475,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0131</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0132</div>
   </footer>
 </div>
 
@@ -1702,7 +1702,9 @@ function renderSpeedWarnDigits(value, color) {
       transform: `translate(${gx} 0)`
     }));
   });
-  speedWarnDigitsEl.setAttribute("transform", "translate(260 198) scale(1.5)");
+  // Centred on the dial (200,200), same spot as the frost gauge's
+  // temperature; 70% bigger than the old 1.5 scale, per request.
+  speedWarnDigitsEl.setAttribute("transform", "translate(200 200) scale(2.55)");
 }
 function clearSpeedWarnDigits() {
   while (speedWarnDigitsEl.firstChild) speedWarnDigitsEl.removeChild(speedWarnDigitsEl.firstChild);
