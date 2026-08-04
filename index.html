@@ -1625,6 +1625,29 @@
           <clipPath id="mapClip">
             <circle cx="200" cy="200" r="132"/>
           </clipPath>
+
+          <!-- Mini speed-limit sign on the map: same 3 face tints as
+               Scherm 2's limitFace2/Y/B, just scoped to this gauge. -->
+          <radialGradient id="limitFaceMapR" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="70%" stop-color="#f2f2ee"/>
+            <stop offset="100%" stop-color="#dedede"/>
+          </radialGradient>
+          <radialGradient id="limitFaceMapY" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#ffdb9e"/>
+            <stop offset="70%" stop-color="#ffc670"/>
+            <stop offset="100%" stop-color="#e0a848"/>
+          </radialGradient>
+          <radialGradient id="limitFaceMapB" cx="45%" cy="40%" r="65%">
+            <stop offset="0%" stop-color="#a9c6f5"/>
+            <stop offset="70%" stop-color="#7fa8ed"/>
+            <stop offset="100%" stop-color="#4a90e2"/>
+          </radialGradient>
+          <!-- Same soft-glow technique (feGaussianBlur) as the speed/frost
+               dials' warning glows (coldGlowS/coldGlowF), scoped here. -->
+          <filter id="coldGlowM" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
         </defs>
         <g id="mapBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
@@ -1676,11 +1699,21 @@
                 font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="17"
                 fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="2"
                 paint-order="stroke">-- km/h</text>
-          <text id="mapLimitText" x="200" y="104" text-anchor="middle"
-                font-family="Futura, 'Century Gothic', sans-serif" font-size="9" letter-spacing="1"
-                fill="rgba(255,255,255,.85)" stroke="rgba(0,0,0,.65)" stroke-width="1.6"
-                paint-order="stroke">LIMIT --</text>
         </g>
+
+        <!-- Mini speed-limit sign on the map dial — same 3-state colour
+             scheme as the Scherm 1/2 signs (red=known, amber=unknown,
+             blue=no limit), red rim + white/tinted face + black hand-
+             drawn digits (same GLYPH font as everywhere else), plus a
+             soft colour-matched glow. Kept in sync via updateMapSpeedInfo()
+             (called from onPosition() and applyLimitDisplay() — the
+             latter also runs during the TEST PING limit-state walk-
+             through, so this updates there too). -->
+        <g id="mapLimitSign" transform="translate(200,120)" style="pointer-events:none">
+          <circle id="mapLimitGlow" r="18" fill="#d63b3b" opacity=".5" filter="url(#coldGlowM)"/>
+          <circle id="mapLimitFace" r="13" fill="url(#limitFaceMapR)" stroke="#d63b3b" stroke-width="4"/>
+        </g>
+        <g id="mapLimitDigits"></g>
 
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
@@ -1744,7 +1777,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0149</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0150</div>
   </footer>
 </div>
 
@@ -3411,26 +3444,43 @@ const mapImageEl = document.getElementById("mapImage");
 const mapCarIconEl = document.getElementById("mapCarIcon");
 const mapPlaceholderEl = document.getElementById("mapPlaceholder");
 const mapSpeedTextEl = document.getElementById("mapSpeedText");
-const mapLimitTextEl = document.getElementById("mapLimitText");
+const mapLimitFaceEl = document.getElementById("mapLimitFace");
+const mapLimitGlowEl = document.getElementById("mapLimitGlow");
+const mapLimitDigitsEl = document.getElementById("mapLimitDigits");
 let lastCourse = null;
 let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
 const MAP_ZOOM = 16;
+// Same hand-drawn glyphs as the other signs, just much smaller — sized
+// to fit the mini sign's ~26px face.
+const MAP_LIMIT_DIGIT_SCALE = 0.85;
+const MAP_LIMIT_SIGN_Y = 120; // matches #mapLimitSign's transform above
+function mapLimitSignColors(kind) {
+  if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
+  if (kind === "infinite") return { ring: "#4a90e2", face: "url(#limitFaceMapB)" };
+  return { ring: "#d63b3b", face: "url(#limitFaceMapR)" };
+}
 
-/* Keeps the map dial's own speed/limit readout in sync with the main
-   speedometer and limit-sign gauges. Called from onPosition() whenever
-   a fresh speed is computed, and from applyLimitDisplay() whenever the
-   limit-sign state changes (real fetch, restore, or test simulation) —
-   both are the single sources of truth already used elsewhere, so this
-   just mirrors them rather than tracking anything new. Wrapped in
-   try/catch because at boot this can fire before lastSpeedKmh/
-   currentLimit's own declarations have executed (same TDZ edge case as
-   setScreen3's boot-time re-render). */
+/* Keeps the map dial's own speed readout and mini limit-sign in sync
+   with the main speedometer and limit-sign gauges. Called from
+   onPosition() whenever a fresh speed is computed, and from
+   applyLimitDisplay() whenever the limit-sign state changes (real
+   fetch, restore, or TEST PING simulation) — both are the single
+   sources of truth already used elsewhere, so this just mirrors them
+   rather than tracking anything new. Wrapped in try/catch because at
+   boot this can fire before lastSpeedKmh/currentLimit's own
+   declarations have executed (same TDZ edge case as setScreen3's
+   boot-time re-render). */
 function updateMapSpeedInfo() {
   try {
     const kmh = typeof lastSpeedKmh === "number" ? Math.round(lastSpeedKmh) : null;
     mapSpeedTextEl.textContent = kmh === null ? "-- km/h" : `${kmh} km/h`;
-    mapLimitTextEl.textContent = `LIMIT ${limitTextFor(limitKind, currentLimit)}`;
+    const colors = mapLimitSignColors(limitKind);
+    mapLimitFaceEl.setAttribute("fill", colors.face);
+    mapLimitFaceEl.setAttribute("stroke", colors.ring);
+    mapLimitGlowEl.setAttribute("fill", colors.ring);
+    renderLimitDigitsInto(mapLimitDigitsEl, limitTextFor(limitKind, currentLimit),
+                           "#111", MAP_LIMIT_SIGN_Y, MAP_LIMIT_DIGIT_SCALE);
   } catch { /* referenced state not initialised yet — ignore, next call fixes it */ }
 }
 
