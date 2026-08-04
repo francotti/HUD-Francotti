@@ -1622,7 +1622,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0138</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0139</div>
   </footer>
 </div>
 
@@ -2396,9 +2396,26 @@ function setScreen4(v) {
 screen4Btn.addEventListener("click", () => setScreen4(!document.body.classList.contains("mode-screen4")));
 try { setScreen4(localStorage.getItem(SCREEN4_KEY) === "1"); } catch { setScreen4(false); }
 
-// Swipe left/right anywhere on the page to switch screens — swipe left
-// (finger moves right-to-left) goes to Scherm 2, swipe right goes back to
-// Scherm 1. Ignores mostly-vertical drags/scrolls and short taps.
+// Swipe left/right anywhere on the page to cycle through all 4 screens
+// — swipe left (finger moves right-to-left) goes to the next screen
+// (1->2->3->4->1, wrapping), swipe right goes to the previous one.
+// Ignores mostly-vertical drags/scrolls and short taps.
+function getCurrentScreenIndex() {
+  const b = document.body.classList;
+  if (b.contains("mode-screen4")) return 4;
+  if (b.contains("mode-screen3")) return 3;
+  if (b.contains("mode-screen2")) return 2;
+  return 1;
+}
+function goToScreen(n) {
+  const target = ((n - 1) % 4 + 4) % 4 + 1; // wrap into 1..4
+  setScreen4(target === 4);
+  setScreen3(target === 3);
+  if (target === 2) setScreen2(true);
+  else if (target === 1) setScreen2(false);
+  // target 3 already forces Scherm 2 on via setScreen3(); target 4 leaves
+  // whatever Scherm 2/3 state was underneath alone (it's fully hidden).
+}
 const SWIPE_MIN_DX = 60;
 let swipeStartX = null, swipeStartY = null;
 document.addEventListener("touchstart", (e) => {
@@ -2413,7 +2430,7 @@ document.addEventListener("touchend", (e) => {
   const dy = t.clientY - swipeStartY;
   swipeStartX = null; swipeStartY = null;
   if (Math.abs(dx) < SWIPE_MIN_DX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-  setScreen2(dx < 0);
+  goToScreen(getCurrentScreenIndex() + (dx < 0 ? 1 : -1));
 }, { passive: true });
 
 /* =====================================================================
