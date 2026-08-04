@@ -1499,7 +1499,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0135</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0136</div>
   </footer>
 </div>
 
@@ -1524,7 +1524,9 @@ if (window.navigator.standalone === true) document.body.classList.add("ios-stand
    layout & piecewise angle mapping as the Jaeger temperature dial.
 ===================================================================== */
 const SPEED_MARKS = [0, 50, 100, 150, 200];
-const numX  = [124, 166, 200, 238, 276];
+// "0" is aligned exactly under the lower end of its own tick mark
+// (tickX[0]) per request, instead of the old custom-offset 124.
+const numX  = [132, 166, 200, 238, 276];
 const tickX = [132, 166, 200, 234, 268];
 const numY  = 156;
 const fanOX = 200, fanOY = 236;
@@ -1942,13 +1944,13 @@ function pointSpeedTo(v, opts = {}) {
   setSpeedGlowState(red, extreme);
   if (extreme) startSiren(); else stopSiren();
   // Scherm 1: always show the current speed as digits in the dial (same
-  // spot/font/size as the old over-limit-only readout) — green when at
+  // spot/font/size as the old over-limit-only readout) — white when at
   // or under the limit (or no limit known), amber when 0-5 over, bright
   // red + glowing when 5-30+ over. Hidden entirely on Scherm 2 via CSS
   // (that screen has its own big number).
   if (red) renderSpeedWarnDigits(v, "#ff4d4d", true);
   else if (hot) renderSpeedWarnDigits(v, "#ffb347");
-  else renderSpeedWarnDigits(v, "#4caf50");
+  else renderSpeedWarnDigits(v, "#ffffff");
   // Scherm 2/3's big digit: 0-4 over the limit = static amber, 5-30+
   // over = bright red glow (same red as the Scherm 1 readout/needle).
   renderSpeedBigDigits(clamped, red ? "red-glow" : (hot ? "yellow" : "normal"));
