@@ -209,6 +209,18 @@
   body.mode-screen3 #limitLogo,
   body.mode-screen3 #frostLogo,
   body.mode-screen3 #signalLogo{ display:none; }
+  /* Also drop the original black dial face + its "shadow ring" arc
+     pairs (the layered sunken-dial look) on the same four gauges — the
+     page background behind is already the same near-black (#0a0a0a), so
+     ticks/needle/numerals/digits are left floating on it cleanly. The
+     speed gauge's extra vignette overlay (drawn after the ticks) goes
+     with it; the limit sign's face is left alone, same reasoning as
+     its ring above. */
+  body.mode-screen3 #speedFaceRings,
+  body.mode-screen3 #speedInnerShadow,
+  body.mode-screen3 #compassFaceRings,
+  body.mode-screen3 #frostFaceRings,
+  body.mode-screen3 #signalFaceRings{ display:none; }
 
   /* Big digit's own yellow-glow tier (>=5 km/h over the limit) — slower
      than the ring/needle's pulse (2.8s) since this one is meant to read
@@ -498,6 +510,7 @@
                   stroke="#d64545" stroke-width="40" mask="url(#bezelRingS)" filter="url(#coldGlowS)"/>
         </g>
 
+        <g id="speedFaceRings">
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceS)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -509,12 +522,13 @@
         <circle cx="200" cy="200" r="132" fill="url(#deepFaceS)"/>
         <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        </g>
 
         <!-- Extreme-over-limit (>30 km/h): whole background glows red. -->
         <circle class="speed-bg-glow-red" id="speedBgGlowRed" cx="200" cy="200" r="156" fill="#d64545" filter="url(#coldGlowS)"/>
 
         <g id="speedTicks"></g>
-        <circle cx="200" cy="200" r="132" fill="url(#bezelInnerShadowS)" pointer-events="none"/>
+        <circle id="speedInnerShadow" cx="200" cy="200" r="132" fill="url(#bezelInnerShadowS)" pointer-events="none"/>
         <g id="speedNumerals"></g>
 
         <!-- Unit label (hidden on Scherm 2 — the big number takes this space) -->
@@ -682,6 +696,7 @@
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
         </g>
+        <g id="compassFaceRings">
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceW)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -693,6 +708,7 @@
         <circle cx="200" cy="200" r="132" fill="url(#deepFaceW)"/>
         <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        </g>
         <g id="compassFace">
           <g id="windTicks"></g>
           <g id="windLetters"></g>
@@ -1214,6 +1230,7 @@
                   stroke="#d64545" stroke-width="40" mask="url(#bezelRingF)" filter="url(#coldGlowF)"/>
         </g>
 
+        <g id="frostFaceRings">
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceF)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -1225,6 +1242,7 @@
         <circle cx="200" cy="200" r="132" fill="url(#deepFaceF)"/>
         <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        </g>
         <!-- Temperature readout, centre of the upper half, same hand-drawn
              vintage-gauge digit set as the speed dial. Filled in by
              renderFrostTemp() in the script below. -->
@@ -1383,6 +1401,7 @@
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
         </g>
+        <g id="signalFaceRings">
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceG)"/>
         <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -1394,6 +1413,7 @@
         <circle cx="200" cy="200" r="132" fill="url(#deepFaceG)"/>
         <path d="M 72 200 A 128 128 0 0 1 328 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="5"/>
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+        </g>
 
         <!-- Crosshair reticle + between-ring tick sets (radius 27, 55,
              100) — positions are fixed, but the colour is updated by
@@ -1475,7 +1495,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0132</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0133</div>
   </footer>
 </div>
 
