@@ -1695,25 +1695,27 @@
              trick as the attribution text, so it stays legible over
              the map regardless of what's underneath. -->
         <g id="mapSpeedInfo" style="pointer-events:none">
-          <text id="mapSpeedText" x="200" y="90" text-anchor="middle"
-                font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="17"
-                fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="2"
-                paint-order="stroke">-- km/h</text>
+          <text id="mapSpeedText" x="158" y="108" text-anchor="middle" dominant-baseline="central"
+                font-family="Futura, 'Century Gothic', sans-serif" font-weight="700" font-size="25.5"
+                fill="rgba(255,255,255,.92)" stroke="rgba(0,0,0,.65)" stroke-width="2.5"
+                paint-order="stroke">--</text>
         </g>
 
         <!-- Mini speed-limit sign on the map dial — same 3-state colour
              scheme as the Scherm 1/2 signs (red=known, amber=unknown,
              blue=no limit), red rim + white/tinted face + black hand-
              drawn digits (same GLYPH font as everywhere else), plus a
-             soft colour-matched glow. Kept in sync via updateMapSpeedInfo()
-             (called from onPosition() and applyLimitDisplay() — the
-             latter also runs during the TEST PING limit-state walk-
-             through, so this updates there too). -->
-        <g id="mapLimitSign" transform="translate(200,120)" style="pointer-events:none">
-          <circle id="mapLimitGlow" r="18" fill="#d63b3b" opacity=".5" filter="url(#coldGlowM)"/>
-          <circle id="mapLimitFace" r="13" fill="url(#limitFaceMapR)" stroke="#d63b3b" stroke-width="4"/>
+             soft colour-matched glow. 50% bigger and shifted up/right
+             per request, with the speed readout moved to sit at the
+             same height, to its left. Kept in sync via
+             updateMapSpeedInfo() (called from onPosition(), pointSpeedTo()
+             — so it also tracks TEST RUN/TEST LIMIT WARN, not just real
+             GPS — and applyLimitDisplay(), which also covers TEST PING). -->
+        <g id="mapLimitSign" transform="translate(214,108)" style="pointer-events:none">
+          <circle id="mapLimitGlow" r="27" fill="#d63b3b" opacity=".5" filter="url(#coldGlowM)"/>
+          <circle id="mapLimitFace" r="19.5" fill="url(#limitFaceMapR)" stroke="#d63b3b" stroke-width="6"/>
         </g>
-        <g id="mapLimitDigits"></g>
+        <g transform="translate(14,0)"><g id="mapLimitDigits"></g></g>
 
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
@@ -1777,7 +1779,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0150</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0151</div>
   </footer>
 </div>
 
@@ -2232,6 +2234,10 @@ function pointSpeedTo(v, opts = {}) {
   // Scherm 2/3's big digit: 0-4 over the limit = static amber, 5-30+
   // over = bright red glow (same red as the Scherm 1 readout/needle).
   renderSpeedBigDigits(clamped, red ? "red-glow" : (hot ? "yellow" : "normal"));
+  // Mirrors whatever pointSpeedTo() is actually driving right now — real
+  // GPS speed or a TEST RUN/TEST LIMIT WARN step — so the map dial's
+  // speed number tracks the tests too, not just live position updates.
+  updateMapSpeedInfo(clamped);
   if (opts.showDigital) speedDigital.textContent = `${v.toFixed(0)}`;
   else if (!testRunActive) speedDigital.textContent = "";
 }
@@ -3452,9 +3458,9 @@ let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
 const MAP_ZOOM = 16;
 // Same hand-drawn glyphs as the other signs, just much smaller — sized
-// to fit the mini sign's ~26px face.
-const MAP_LIMIT_DIGIT_SCALE = 0.85;
-const MAP_LIMIT_SIGN_Y = 120; // matches #mapLimitSign's transform above
+// to fit the mini sign's ~39px (50% bigger) face.
+const MAP_LIMIT_DIGIT_SCALE = 1.275;
+const MAP_LIMIT_SIGN_Y = 108; // matches #mapLimitSign's transform above
 function mapLimitSignColors(kind) {
   if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
   if (kind === "infinite") return { ring: "#4a90e2", face: "url(#limitFaceMapB)" };
@@ -3462,19 +3468,24 @@ function mapLimitSignColors(kind) {
 }
 
 /* Keeps the map dial's own speed readout and mini limit-sign in sync
-   with the main speedometer and limit-sign gauges. Called from
-   onPosition() whenever a fresh speed is computed, and from
-   applyLimitDisplay() whenever the limit-sign state changes (real
-   fetch, restore, or TEST PING simulation) — both are the single
-   sources of truth already used elsewhere, so this just mirrors them
-   rather than tracking anything new. Wrapped in try/catch because at
-   boot this can fire before lastSpeedKmh/currentLimit's own
-   declarations have executed (same TDZ edge case as setScreen3's
-   boot-time re-render). */
-function updateMapSpeedInfo() {
+   with the main speedometer and limit-sign gauges.
+   - speedOverride: pass the value pointSpeedTo() is actually driving the
+     needle/digits with right now (real GPS or a test step) — pointSpeedTo()
+     itself calls this on every update, which is what makes the map track
+     TEST RUN/TEST LIMIT WARN too (those never touch lastSpeedKmh). When
+     called with no argument (from applyLimitDisplay(), or once at boot),
+     it falls back to lastSpeedKmh so a limit-only change doesn't blank
+     the speed number.
+   - The limit sign always reads limitKind/currentLimit directly, so it's
+     current regardless of which caller triggered this.
+   Wrapped in try/catch because at boot this can fire before
+   lastSpeedKmh/currentLimit's own declarations have executed (same TDZ
+   edge case as setScreen3's boot-time re-render). */
+function updateMapSpeedInfo(speedOverride) {
   try {
-    const kmh = typeof lastSpeedKmh === "number" ? Math.round(lastSpeedKmh) : null;
-    mapSpeedTextEl.textContent = kmh === null ? "-- km/h" : `${kmh} km/h`;
+    const src = typeof speedOverride === "number" ? speedOverride : lastSpeedKmh;
+    const kmh = typeof src === "number" ? Math.round(src) : null;
+    mapSpeedTextEl.textContent = kmh === null ? "--" : `${kmh}`;
     const colors = mapLimitSignColors(limitKind);
     mapLimitFaceEl.setAttribute("fill", colors.face);
     mapLimitFaceEl.setAttribute("stroke", colors.ring);
