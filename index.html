@@ -1713,7 +1713,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0145</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0146</div>
   </footer>
 </div>
 
@@ -3416,23 +3416,16 @@ function updateMapGauge(lat, lon, headingFromGps, prevPos) {
 }
 
 /* Default view shown before a real GPS fix arrives (or if it never
-   does — permission denied, no signal, etc.): a static overview map
-   centered on the Netherlands instead of a blank placeholder. Any
-   later real fix from onPosition()/updateMapGauge() simply overwrites
-   this with the live position, and shows the direction marker on
-   top of it — this only covers the "no GPS yet" gap. */
-const NL_DEFAULT_CENTER = { lat: 52.1326, lon: 5.2913 };
-const NL_DEFAULT_ZOOM = 6.3;
+   does — permission denied, no signal, etc.): a bundled static
+   overview map of the Netherlands (nl-default-map.png — a one-time
+   Mapbox dark-v11 snapshot, pre-cropped to a circle) instead of a
+   blank placeholder or a live API request. No Mapbox token or
+   network call is needed for this default view; it's a local asset.
+   Any later real fix from onPosition()/updateMapGauge() overwrites
+   this with the live position and shows the direction marker on top
+   — this only covers the "no GPS yet" gap. */
 function showDefaultMap() {
-  const token = getMapboxToken();
-  if (!token) {
-    mapPlaceholderEl.textContent = "— EERST MAPBOX KEY INSTELLEN —";
-    mapPlaceholderEl.style.display = "";
-    return;
-  }
-  const url = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/` +
-    `${NL_DEFAULT_CENTER.lon},${NL_DEFAULT_CENTER.lat},${NL_DEFAULT_ZOOM},0/300x300@2x?access_token=${token}`;
-  mapImageEl.setAttribute("href", url);
+  mapImageEl.setAttribute("href", "nl-default-map.png");
   mapPlaceholderEl.style.display = "none";
   mapCarIconEl.setAttribute("display", "none"); // no real fix yet — no position marker
 }
