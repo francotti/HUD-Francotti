@@ -1729,7 +1729,7 @@
              Hand-drawn GLYPH digits (same font as every other dial),
              built by renderMapSpeedDigits() below: yellow/red glow
              layers for the 0-5 / >=5 over-limit tiers, no outline. -->
-        <g id="mapSpeedDigits" transform="translate(168 116) scale(2.2)"></g>
+        <g id="mapSpeedDigits" transform="translate(168 116) scale(2.0)"></g>
 
         <!-- Mini speed-limit sign on the map dial — same 3-state colour
              scheme as the Scherm 1/2 signs (red=known, amber=unknown,
@@ -1811,7 +1811,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0157</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0158</div>
   </footer>
 </div>
 
@@ -3490,8 +3490,10 @@ let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
 const MAP_ZOOM = 16;
 // Same hand-drawn glyphs as the other signs — a bit smaller than the
-// sign's very first size, per request.
+// sign's very first size, per request. 3-digit limits (100+) get a
+// further-reduced scale so they still fit the face comfortably.
 const MAP_LIMIT_DIGIT_SCALE = 1.1;
+const MAP_LIMIT_DIGIT_SCALE_WIDE = 0.85;
 const MAP_LIMIT_SIGN_Y = 116; // matches #mapLimitSign's transform above
 function mapLimitSignColors(kind) {
   if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
@@ -3563,8 +3565,9 @@ function updateMapSpeedInfo(speedOverride) {
     mapLimitFaceEl.setAttribute("fill", colors.face);
     mapLimitFaceEl.setAttribute("stroke", colors.ring);
     mapLimitGlowEl.setAttribute("fill", colors.ring);
-    renderLimitDigitsInto(mapLimitDigitsEl, limitTextFor(limitKind, currentLimit),
-                           "#111", MAP_LIMIT_SIGN_Y, MAP_LIMIT_DIGIT_SCALE);
+    const limitText = limitTextFor(limitKind, currentLimit);
+    const limitScale = limitText.length >= 3 ? MAP_LIMIT_DIGIT_SCALE_WIDE : MAP_LIMIT_DIGIT_SCALE;
+    renderLimitDigitsInto(mapLimitDigitsEl, limitText, "#111", MAP_LIMIT_SIGN_Y, limitScale);
   } catch { /* referenced state not initialised yet — ignore, next call fixes it */ }
 }
 
