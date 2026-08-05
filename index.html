@@ -1674,6 +1674,16 @@
           <filter id="coldGlowM" x="-100%" y="-100%" width="300%" height="300%">
             <feGaussianBlur stdDeviation="3"/>
           </filter>
+
+          <!-- Mini temp-dial copy on the map: only new gradient it needs
+               is its own deep-face fill (chrome ring/grey shadow ring/
+               glow all reuse this gauge's own bezelChromeM/faceM/
+               innerBezelM/bezelRingM/coldGlowM defs above, unchanged). -->
+          <radialGradient id="deepFaceMT" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#252525"/>
+            <stop offset="55%"  stop-color="#1f1f1f"/>
+            <stop offset="100%" stop-color="#1a1a1a"/>
+          </radialGradient>
         </defs>
         <g id="mapBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
@@ -1749,6 +1759,47 @@
         </g>
         <g transform="translate(28,0)"><g id="mapLimitDigits"></g></g>
 
+        <!-- Mini copy of the Jaeger temp dial (frostGauge) on the map —
+             same chrome ring, grey shadow ring and cold/hot/red glow
+             tiers, reusing this gauge's own bezelChromeM/faceM/
+             innerBezelM/bezelRingM/coldGlowM defs (only deepFaceMT above
+             is new). No washboard, no logo — no room at this size — and
+             the digits are drawn noticeably larger than the real dial's
+             (see MAP_TEMP_DIGIT_SCALE below) while still staying inside
+             the r=132 deep-face boundary, i.e. within its own shadow
+             rings. Built by embedding the real dial's unmodified 400x400
+             geometry inside translate(cx,cy) scale(k) translate(-200,-200)
+             — recentres+shrinks it as one block instead of hand-scaling
+             every coordinate. Kept in sync with the real frost gauge via
+             updateMapTempInfo(), called from applyFrostWarnClasses(). -->
+        <g id="mapTempDial" transform="translate(200,278) scale(0.137755) translate(-200,-200)">
+          <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
+          <rect width="400" height="400" fill="url(#bezelSheenM)" mask="url(#bezelRingM)"/>
+          <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+          <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+          <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+          <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+
+          <g class="frost-bezel-glow" id="mapTempBezelGlow">
+            <circle class="frost-bezel-glow-cold" cx="200" cy="200" r="178" fill="none"
+                    stroke="#4a90e2" stroke-width="40" mask="url(#bezelRingM)" filter="url(#coldGlowM)"/>
+            <circle class="frost-bezel-glow-red" cx="200" cy="200" r="178" fill="none"
+                    stroke="#d64545" stroke-width="40" mask="url(#bezelRingM)" filter="url(#coldGlowM)"/>
+          </g>
+
+          <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+          <circle cx="200" cy="200" r="156" fill="url(#faceM)"/>
+          <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+          <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="142" fill="url(#innerBezelM)"/>
+          <rect width="400" height="400" fill="url(#innerBezelSheenM)" mask="url(#innerBezelRingM)"/>
+          <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+          <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="132" fill="url(#deepFaceMT)"/>
+
+          <g id="mapTempDigits" class="frost-digits"></g>
+        </g>
+
         <!-- Position/heading marker: navy-blue chevron arrow icon
              (nav-arrow-icon.png, transparent PNG, background removed
              from a supplied graphic and recolored red->navy / dark->
@@ -1811,7 +1862,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-04-0158</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0159</div>
   </footer>
 </div>
 
@@ -3084,6 +3135,7 @@ function applyFrostWarnClasses(t) {
   frostDigitsEl.classList.toggle("cold-warn", cold);
   frostDigitsEl.classList.toggle("hot-warn",  hot);
   frostDigitsEl.classList.toggle("red-warn",  red);
+  updateMapTempInfo(t);
 }
 
 async function maybeFetchWeather(lat, lon) {
@@ -3485,6 +3537,8 @@ const mapSpeedDigitsEl = document.getElementById("mapSpeedDigits");
 const mapLimitFaceEl = document.getElementById("mapLimitFace");
 const mapLimitGlowEl = document.getElementById("mapLimitGlow");
 const mapLimitDigitsEl = document.getElementById("mapLimitDigits");
+const mapTempBezelGlowEl = document.getElementById("mapTempBezelGlow");
+const mapTempDigitsEl = document.getElementById("mapTempDigits");
 let lastCourse = null;
 let lastMapFetch = 0;
 const MAP_FETCH_INTERVAL_MS = 5000;
@@ -3499,6 +3553,66 @@ function mapLimitSignColors(kind) {
   if (kind === "unknown")  return { ring: "#ffb347", face: "url(#limitFaceMapY)" };
   if (kind === "infinite") return { ring: "#4a90e2", face: "url(#limitFaceMapB)" };
   return { ring: "#d63b3b", face: "url(#limitFaceMapR)" };
+}
+
+// Mini temp-dial digits — drawn in the SAME 400x400 space as the rest
+// of #mapTempDial's copied geometry (see the markup comment), so this
+// scale is much bigger than the real dial's FROST_DIGIT_SCALE (2.72):
+// it only ends up small on screen because the whole #mapTempDial group
+// gets shrunk afterwards. 3+ character readings (e.g. "-10") get a
+// slightly smaller scale, same idea as the limit sign's 100+ handling,
+// so they still sit comfortably inside the r=132 deep face.
+const MAP_TEMP_DIGIT_SCALE = 8.5;
+const MAP_TEMP_DIGIT_SCALE_WIDE = 6.5;
+function renderMapTempDigits(value) {
+  while (mapTempDigitsEl.firstChild) mapTempDigitsEl.removeChild(mapTempDigitsEl.firstChild);
+  const rounded = Math.round(value);
+  const chars = String(rounded).split("");
+  const offsets = [0];
+  for (let k = 1; k < chars.length; k++) {
+    const narrow = chars[k] === "1" || chars[k-1] === "1" || chars[k] === "-" || chars[k-1] === "-";
+    offsets.push(offsets[k-1] + (narrow ? PITCH_NARROW : PITCH_WIDE));
+  }
+  const totalW = offsets[offsets.length - 1];
+  const cold = value < COLD_WARN_BELOW;
+  const red  = value > RED_WARN_ABOVE;
+  const crispColor = cold ? "#4a90e2" : red ? "#d64545" : "#d8dfe1";
+  function digitGroup(cls, stroke, strokeW, filterAttr) {
+    const g = el("g", filterAttr ? { class: cls, filter: filterAttr } : { class: cls });
+    chars.forEach((ch, idx) => {
+      const gx = offsets[idx] - totalW / 2;
+      g.appendChild(el("path", {
+        d: GLYPH[ch], fill: "none", stroke,
+        "stroke-width": strokeW, "stroke-linecap": "round", "stroke-linejoin": "round",
+        transform: `translate(${gx} 0)`
+      }));
+    });
+    return g;
+  }
+  const scale = chars.length >= 3 ? MAP_TEMP_DIGIT_SCALE_WIDE : MAP_TEMP_DIGIT_SCALE;
+  const wrapper = el("g", { transform: `translate(200 200) scale(${scale})` });
+  wrapper.appendChild(digitGroup("frost-digit-glow-cold", "#4a90e2", GLYPH_STROKE + 2.5, "url(#coldGlowM)"));
+  wrapper.appendChild(digitGroup("frost-digit-glow-hot",  "#ffb347", GLYPH_STROKE + 2.5, "url(#coldGlowM)"));
+  wrapper.appendChild(digitGroup("frost-digit-glow-red",  "#d64545", GLYPH_STROKE + 2.5, "url(#coldGlowM)"));
+  wrapper.appendChild(digitGroup("frost-digit-crisp",     crispColor, GLYPH_STROKE, null));
+  mapTempDigitsEl.appendChild(wrapper);
+}
+
+// Mirrors the real frost gauge's cold/hot/red state onto the mini copy.
+// Called from applyFrostWarnClasses() (real weather fetch, TEST FROST,
+// and boot restore all funnel through there already). Wrapped in
+// try/catch for the same boot-time TDZ reason as updateMapSpeedInfo().
+function updateMapTempInfo(t) {
+  try {
+    renderMapTempDigits(t);
+    const cold = t < COLD_WARN_BELOW;
+    const red  = t > RED_WARN_ABOVE;
+    mapTempBezelGlowEl.classList.toggle("cold-warn", cold);
+    mapTempBezelGlowEl.classList.toggle("red-warn",  red);
+    mapTempDigitsEl.classList.toggle("cold-warn", cold);
+    mapTempDigitsEl.classList.toggle("hot-warn",  t > HOT_WARN_ABOVE && !red);
+    mapTempDigitsEl.classList.toggle("red-warn",  red);
+  } catch { /* referenced state not initialised yet — ignore, next call fixes it */ }
 }
 
 // Map dial's speed readout, hand-drawn GLYPH digits (same font as every
