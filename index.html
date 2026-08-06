@@ -1958,7 +1958,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-06-0163</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-06-0164</div>
   </footer>
 </div>
 
@@ -2722,7 +2722,15 @@ function setMirror(v) {
   mirrorBtn.textContent = v ? "MIRROR ON" : "MIRROR OFF";
   try { localStorage.setItem(MIRROR_KEY, v ? "1" : "0"); } catch {}
 }
-screen2Btn.addEventListener("click", () => setScreen2(!document.body.classList.contains("mode-screen2")));
+// Buttons jump straight to their screen from wherever you currently are
+// (same as swiping there directly), not just a same-screen on/off toggle —
+// only clicking a screen's own button while already on it toggles back off.
+// getCurrentScreenIndex()/goToScreen() are defined further down as plain
+// function declarations, so they're fully hoisted and safe to call here.
+screen2Btn.addEventListener("click", () => {
+  if (getCurrentScreenIndex() === 2) setScreen2(false);
+  else goToScreen(2);
+});
 mirrorBtn.addEventListener("click", () => setMirror(!document.body.classList.contains("mirror-on")));
 try { setScreen2(localStorage.getItem(SCREEN2_KEY) === "1"); } catch { setScreen2(false); }
 try { setMirror(localStorage.getItem(MIRROR_KEY) === "1"); } catch { setMirror(false); }
@@ -2759,7 +2767,10 @@ function setScreen3(v) {
     renderSpeedBigDigits(lastSpeedKmh ?? 0, "normal");
   } catch {}
 }
-screen3Btn.addEventListener("click", () => setScreen3(!document.body.classList.contains("mode-screen3")));
+screen3Btn.addEventListener("click", () => {
+  if (getCurrentScreenIndex() === 3) setScreen3(false);
+  else goToScreen(3);
+});
 try { setScreen3(localStorage.getItem(SCREEN3_KEY) === "1"); } catch { setScreen3(false); }
 
 // "SCHERM 4" — standalone preview toggle for the navigation dial (see
@@ -2772,7 +2783,10 @@ function setScreen4(v) {
   screen4Btn.textContent = v ? "SCHERM 4 UIT" : "SCHERM 4";
   try { localStorage.setItem(SCREEN4_KEY, v ? "1" : "0"); } catch {}
 }
-screen4Btn.addEventListener("click", () => setScreen4(!document.body.classList.contains("mode-screen4")));
+screen4Btn.addEventListener("click", () => {
+  if (getCurrentScreenIndex() === 4) setScreen4(false);
+  else goToScreen(4);
+});
 try { setScreen4(localStorage.getItem(SCREEN4_KEY) === "1"); } catch { setScreen4(false); }
 
 // Swipe left/right anywhere on the page to cycle through all 4 screens
