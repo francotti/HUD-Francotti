@@ -1684,6 +1684,25 @@
             <stop offset="55%"  stop-color="#1f1f1f"/>
             <stop offset="100%" stop-color="#1a1a1a"/>
           </radialGradient>
+
+          <!-- Mini signal-dial copy on the map: local copies of the real
+               signal gauge's logo-plate filters (same stops as
+               plateShadowG/plateBrightenG) — everything else it needs
+               (chrome ring/grey shadow ring/deep face) reuses the defs
+               above unchanged. -->
+          <filter id="plateShadowM" x="-20%" y="-20%" width="140%" height="160%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.4"/>
+            <feOffset dx="0.6" dy="2"/>
+            <feComponentTransfer><feFuncA type="linear" slope=".75"/></feComponentTransfer>
+            <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="plateBrightenM" x="0%" y="0%" width="100%" height="100%">
+            <feComponentTransfer>
+              <feFuncR type="linear" slope="1.52"/>
+              <feFuncG type="linear" slope="1.52"/>
+              <feFuncB type="linear" slope="1.52"/>
+            </feComponentTransfer>
+          </filter>
         </defs>
         <g id="mapBezelRing">
         <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
@@ -1773,8 +1792,9 @@
              geometry inside translate(cx,cy) scale(k) translate(-200,-200)
              — recentres+shrinks it as one block instead of hand-scaling
              every coordinate. Kept in sync with the real frost gauge via
-             updateMapTempInfo(), called from applyFrostWarnClasses(). -->
-        <g id="mapTempDial" transform="translate(200,278) scale(0.137755) translate(-200,-200)">
+             updateMapTempInfo(), called from applyFrostWarnClasses(). Sits
+             side by side with the mini signal dial below, same height. -->
+        <g id="mapTempDial" transform="translate(165,278) scale(0.137755) translate(-200,-200)">
           <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
           <rect width="400" height="400" fill="url(#bezelSheenM)" mask="url(#bezelRingM)"/>
           <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
@@ -1800,6 +1820,63 @@
           <circle cx="200" cy="200" r="132" fill="url(#deepFaceMT)"/>
 
           <g id="mapTempDigits" class="frost-digits"></g>
+        </g>
+
+        <!-- Mini copy of the Jaeger signal-quality dial (signalGauge) on
+             the map — same chrome ring and grey shadow ring (reusing
+             bezelChromeM/faceM/innerBezelM/bezelRingM/deepFaceMT again),
+             plus the crosshair reticle/ticks and colour-coded accuracy
+             rings, all unchanged. Only the washboard/louver band is left
+             out, per request — logo is kept this time (plateShadowM/
+             plateBrightenM above are local copies of the real dial's
+             plate filters). Same embed-and-shrink technique as the temp
+             copy, sat side by side with it at the same height. Kept in
+             sync via renderMapSignalRings(), called from the end of
+             renderSignalQuality(). -->
+        <g id="mapSignalDial" transform="translate(235,278) scale(0.137755) translate(-200,-200)">
+          <circle cx="200" cy="200" r="196" fill="url(#bezelChromeM)"/>
+          <rect width="400" height="400" fill="url(#bezelSheenM)" mask="url(#bezelRingM)"/>
+          <circle cx="200" cy="200" r="194" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".7"/>
+          <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(0,0,0,.50)"       stroke-width=".6"/>
+          <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
+          <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
+
+          <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
+          <circle cx="200" cy="200" r="156" fill="url(#faceM)"/>
+          <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
+          <path d="M 58 200 A 142 142 0 0 1 342 200" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="142" fill="url(#innerBezelM)"/>
+          <rect width="400" height="400" fill="url(#innerBezelSheenM)" mask="url(#innerBezelRingM)"/>
+          <circle cx="200" cy="200" r="142" fill="none" stroke="rgba(0,0,0,.55)" stroke-width=".5"/>
+          <circle cx="200" cy="200" r="132" fill="none" stroke="rgba(0,0,0,.85)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="132" fill="url(#deepFaceMT)"/>
+
+          <g id="mapSignalStaticTicks" stroke="#d64545" stroke-width="2" stroke-linecap="round">
+            <line x1="200" y1="175" x2="200" y2="185"/>
+            <line x1="200" y1="215" x2="200" y2="225"/>
+            <line x1="175" y1="200" x2="185" y2="200"/>
+            <line x1="215" y1="200" x2="225" y2="200"/>
+            <line x1="200" y1="168" x2="200" y2="178"/>
+            <line x1="200" y1="222" x2="200" y2="232"/>
+            <line x1="168" y1="200" x2="178" y2="200"/>
+            <line x1="222" y1="200" x2="232" y2="200"/>
+            <line x1="200" y1="140" x2="200" y2="150"/>
+            <line x1="200" y1="250" x2="200" y2="260"/>
+            <line x1="140" y1="200" x2="150" y2="200"/>
+            <line x1="250" y1="200" x2="260" y2="200"/>
+            <line x1="200" y1="90" x2="200" y2="100"/>
+            <line x1="200" y1="300" x2="200" y2="310"/>
+            <line x1="90" y1="200" x2="100" y2="200"/>
+            <line x1="300" y1="200" x2="310" y2="200"/>
+          </g>
+          <g id="mapSignalRings" fill="none" stroke-linecap="round"></g>
+
+          <g transform="translate(200,290)" filter="url(#plateShadowM)">
+            <image href="jaeger-logo.png"
+                   x="-31.68" y="-21.58" width="63.36" height="31.16"
+                   preserveAspectRatio="xMidYMid meet"
+                   filter="url(#plateBrightenM)"/>
+          </g>
         </g>
 
         <!-- Position/heading marker: navy-blue chevron arrow icon
@@ -1864,7 +1941,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0161</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0162</div>
   </footer>
 </div>
 
@@ -2574,6 +2651,37 @@ let lastSignalTierCount = null; // tracks 1/2/3-ring tier so we can ping only on
 const signalRingsEl = document.getElementById("signalRings");
 const signalStaticTicksEl = document.getElementById("signalStaticTicks");
 const SIGNAL_RING_RADII = [35, 75, 115]; // equal 40-unit spacing between each ring
+const mapSignalRingsEl = document.getElementById("mapSignalRings");
+const mapSignalStaticTicksEl = document.getElementById("mapSignalStaticTicks");
+
+// Mirrors the real signal gauge's crosshair/ticks colour and tier rings
+// onto the mini copy on the map dial. Called from the end of
+// renderSignalQuality() (real GPS fixes, TEST SIGNAL and boot restore all
+// funnel through there already). Wrapped in try/catch for boot-time
+// temporal-dead-zone safety, same as the other map mini-dial mirrors.
+function renderMapSignalRings(tierCount, color) {
+  try {
+    while (mapSignalRingsEl.firstChild) mapSignalRingsEl.removeChild(mapSignalRingsEl.firstChild);
+    mapSignalStaticTicksEl.setAttribute("stroke", color);
+    for (let i = 0; i < tierCount; i++) {
+      const r = SIGNAL_RING_RADII[i];
+      mapSignalRingsEl.appendChild(el("circle", {
+        cx: 200, cy: 200, r,
+        stroke: color, "stroke-width": 6
+      }));
+      const innerR = i === 2 ? SIGNAL_RING_RADII[1] : r - 5;
+      const outerR = i === 2 ? r : r + 5;
+      [[200, 200 - outerR, 200, 200 - innerR],
+       [200, 200 + innerR, 200, 200 + outerR],
+       [200 - outerR, 200, 200 - innerR, 200],
+       [200 + innerR, 200, 200 + outerR, 200]].forEach(([x1, y1, x2, y2]) => {
+        mapSignalRingsEl.appendChild(el("line", {
+          x1, y1, x2, y2, stroke: color, "stroke-width": 2, "stroke-linecap": "round"
+        }));
+      });
+    }
+  } catch { /* boot-time TDZ before map elements exist yet */ }
+}
 function setScreen2(v) {
   document.body.classList.toggle("mode-screen2", v);
   screen2Btn.textContent = v ? "SCHERM 1" : "SCHERM 2";
@@ -3043,6 +3151,7 @@ function renderSignalQuality(accuracyMeters) {
       }));
     });
   }
+  renderMapSignalRings(tierCount, color);
 }
 renderSignalQuality(null); // no fix yet at boot — starts on the red/3-ring tier
 
