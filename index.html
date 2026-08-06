@@ -1707,8 +1707,10 @@
         <image id="mapImage" x="68" y="68" width="264" height="264"
                clip-path="url(#mapClip)" preserveAspectRatio="xMidYMid slice"/>
 
-        <!-- Soft green tint over the map, per request. -->
-        <circle cx="200" cy="200" r="132" fill="#3fae66" opacity=".16" clip-path="url(#mapClip)"
+        <!-- Lightening wash + soft green tint over the map, per request. -->
+        <circle cx="200" cy="200" r="132" fill="#ffffff" opacity=".14" clip-path="url(#mapClip)"
+                style="pointer-events:none"/>
+        <circle cx="200" cy="200" r="132" fill="#3fc373" opacity=".24" clip-path="url(#mapClip)"
                 style="pointer-events:none"/>
 
         <!-- Inner shadow arcs removed per request — they broke the
@@ -1862,7 +1864,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0159</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0160</div>
   </footer>
 </div>
 
