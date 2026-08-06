@@ -1398,6 +1398,9 @@
             <circle cx="200" cy="200" r="196" fill="white"/>
             <circle cx="200" cy="200" r="160" fill="black"/>
           </mask>
+          <filter id="coldGlowG" x="-100%" y="-30%" width="300%" height="160%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
           <linearGradient id="waveGradG" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%"   stop-color="#5a5a5a"/>
             <stop offset="25%"  stop-color="#363636"/>
@@ -1434,6 +1437,15 @@
         <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
         <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
         </g>
+
+        <!-- Chrome-rim red glow when signal is in its worst (3-ring) tier —
+             same mechanism as the frost/speed dials' warning glow, one
+             colour only here. -->
+        <g class="frost-bezel-glow" id="signalBezelGlow">
+          <circle class="frost-bezel-glow-red" cx="200" cy="200" r="178" fill="none"
+                  stroke="#d64545" stroke-width="40" mask="url(#bezelRingG)" filter="url(#coldGlowG)"/>
+        </g>
+
         <g id="signalFaceRings">
         <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
         <circle cx="200" cy="200" r="156" fill="url(#faceG)"/>
@@ -1841,6 +1853,11 @@
           <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,.25)" stroke-width=".7"/>
           <circle cx="200" cy="200" r="162" fill="none" stroke="rgba(0,0,0,.65)"       stroke-width=".8"/>
 
+          <g class="frost-bezel-glow" id="mapSignalBezelGlow">
+            <circle class="frost-bezel-glow-red" cx="200" cy="200" r="178" fill="none"
+                    stroke="#d64545" stroke-width="40" mask="url(#bezelRingM)" filter="url(#coldGlowM)"/>
+          </g>
+
           <circle cx="200" cy="200" r="160" fill="#0a0a0a"/>
           <circle cx="200" cy="200" r="156" fill="url(#faceM)"/>
           <path d="M 56 200 A 144 144 0 0 1 344 200" fill="none" stroke="rgba(0,0,0,.55)" stroke-width="6"/>
@@ -1941,7 +1958,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-05-0162</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-06-0163</div>
   </footer>
 </div>
 
@@ -2650,24 +2667,32 @@ let lastLiveAccuracy = null; // same reason — setScreen2 below also re-renders
 let lastSignalTierCount = null; // tracks 1/2/3-ring tier so we can ping only on a real transition into red
 const signalRingsEl = document.getElementById("signalRings");
 const signalStaticTicksEl = document.getElementById("signalStaticTicks");
+const signalBezelGlowEl = document.getElementById("signalBezelGlow");
 const SIGNAL_RING_RADII = [35, 75, 115]; // equal 40-unit spacing between each ring
 const mapSignalRingsEl = document.getElementById("mapSignalRings");
 const mapSignalStaticTicksEl = document.getElementById("mapSignalStaticTicks");
+const mapSignalBezelGlowEl = document.getElementById("mapSignalBezelGlow");
+// Map mini copy always uses the "Scherm 2" thick-ring radar style (27
+// instead of 6), regardless of which screen mode is actually active —
+// it reads better at this small size. Per request.
+const MAP_SIGNAL_RING_STROKE_WIDTH = 27;
 
-// Mirrors the real signal gauge's crosshair/ticks colour and tier rings
-// onto the mini copy on the map dial. Called from the end of
-// renderSignalQuality() (real GPS fixes, TEST SIGNAL and boot restore all
-// funnel through there already). Wrapped in try/catch for boot-time
-// temporal-dead-zone safety, same as the other map mini-dial mirrors.
+// Mirrors the real signal gauge's crosshair/ticks colour, tier rings and
+// red chrome-ring glow onto the mini copy on the map dial. Called from
+// the end of renderSignalQuality() (real GPS fixes, TEST SIGNAL and boot
+// restore all funnel through there already). Wrapped in try/catch for
+// boot-time temporal-dead-zone safety, same as the other map mini-dial
+// mirrors.
 function renderMapSignalRings(tierCount, color) {
   try {
     while (mapSignalRingsEl.firstChild) mapSignalRingsEl.removeChild(mapSignalRingsEl.firstChild);
     mapSignalStaticTicksEl.setAttribute("stroke", color);
+    mapSignalBezelGlowEl.classList.toggle("red-warn", tierCount === 3);
     for (let i = 0; i < tierCount; i++) {
       const r = SIGNAL_RING_RADII[i];
       mapSignalRingsEl.appendChild(el("circle", {
         cx: 200, cy: 200, r,
-        stroke: color, "stroke-width": 6
+        stroke: color, "stroke-width": MAP_SIGNAL_RING_STROKE_WIDTH
       }));
       const innerR = i === 2 ? SIGNAL_RING_RADII[1] : r - 5;
       const outerR = i === 2 ? r : r + 5;
@@ -3127,6 +3152,9 @@ function renderSignalQuality(accuracyMeters) {
   lastSignalTierCount = tierCount;
   // Centre crosshair + between-ring tick sets match the same tier colour.
   signalStaticTicksEl.setAttribute("stroke", color);
+  // Chrome-rim red glow, worst (3-ring) tier only — same mechanism as the
+  // frost/speed dials' warning glow.
+  signalBezelGlowEl.classList.toggle("red-warn", tierCount === 3);
   // Scherm 2's rings: 3x thicker (18), then 50% thicker again (27) —
   // everything else (ticks, colours, radii) stays the same.
   const screen2 = document.body.classList.contains("mode-screen2");
