@@ -2022,7 +2022,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0165</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0166</div>
   </footer>
 </div>
 
@@ -3568,11 +3568,11 @@ let navRoute = null;      // { steps: [...], destination: {label,lat,lon} }
 let navActive = false;
 
 /* ---------------- Destination store: Huis/Werk presets, last 20
-   recents, up to 10 favorites — all persisted in localStorage. Huis and
+   recents, up to 20 favorites — all persisted in localStorage. Huis and
    Werk carry hand-entered coordinates so they NEVER need geocoding. --- */
 const NAV_STORE_KEY = "hud.navStore";
 const NAV_RECENTS_MAX = 20;
-const NAV_FAVORITES_MAX = 10;
+const NAV_FAVORITES_MAX = 20;
 
 function loadNavStore() {
   try {
@@ -3605,7 +3605,7 @@ function isFavorite(label) {
   return navStore.favorites.some(f => navNorm(f.label) === navNorm(label));
 }
 // Toggles favorite status for a Recent/Favorite item. Returns "added",
-// "removed", or "full" (already at the 10-favorite cap — the caller
+// "removed", or "full" (already at the 20-favorite cap — the caller
 // asks to remove one first rather than silently dropping the oldest).
 function toggleFavorite(item) {
   const idx = navStore.favorites.findIndex(f => navNorm(f.label) === navNorm(item.label));
@@ -3685,7 +3685,7 @@ navPickerFavEl.addEventListener("click", () => {
   const item = getNavPickerList()[navPickerIndex];
   if (!item || (item.kind !== "recent" && item.kind !== "favorite")) return;
   const result = toggleFavorite(item);
-  if (result === "full") { setStatus("— EERST EEN FAVORIET VERWIJDEREN (MAX 10) —", true); return; }
+  if (result === "full") { setStatus("— EERST EEN FAVORIET VERWIJDEREN (MAX 20) —", true); return; }
   const newIdx = getNavPickerList().findIndex(i => navNorm(i.label) === navNorm(item.label));
   navPickerIndex = newIdx >= 0 ? newIdx : 0;
   renderNavPicker();
