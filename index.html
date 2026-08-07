@@ -1662,6 +1662,31 @@
           <path d="M -5 -8 L 6 0 L -5 8" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round"/>
         </g>
+
+        <!-- GA/STOP touchpoints on the chrome ring, top and bottom (12/6
+             o'clock) — same engraved-touchpoint mechanism as the left/
+             right browse points above and the compass calibration points.
+             Always available (not hidden in either picker or live mode):
+             GA (top) starts navigating to whatever's currently shown in
+             the picker, or re-computes the same route if already
+             navigating (e.g. after going off-route); STOP (bottom) always
+             cancels back to the picker. -->
+        <g id="navRingGa" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Start navigeren" transform="translate(200,22)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M -6 -8 L 7 0 L -6 8 Z" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M -6 -8 L 7 0 L -6 8 Z" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <g id="navRingStop" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Stop navigatie" transform="translate(200,378)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M -6 -6 L 6 -6 L 6 6 L -6 6 Z" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M -6 -6 L 6 -6 L 6 6 L -6 6 Z" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
       </svg>
     </div>
 
@@ -2022,7 +2047,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0167</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0168</div>
   </footer>
 </div>
 
@@ -3698,11 +3723,33 @@ navPickerFavEl.addEventListener("click", () => {
 });
 
 /* ---------------- Spoken turn-by-turn instructions ------------------- */
+// Prefers a Belgian Dutch (nl-BE) voice, ideally a female one by name
+// (iOS Safari's built-in nl-BE voice is "Ellen") — falls back to any
+// nl-BE voice, then any Dutch voice, then the lang tag alone. Voice
+// lists load asynchronously on some browsers, so this re-picks whenever
+// the browser reports the list has changed.
+let navVoice = null;
+function pickNavVoice() {
+  try {
+    const voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return;
+    navVoice =
+      voices.find(v => /nl-BE/i.test(v.lang) && /ellen|female|vrouw/i.test(v.name)) ||
+      voices.find(v => /nl-BE/i.test(v.lang)) ||
+      voices.find(v => /^nl/i.test(v.lang)) ||
+      null;
+  } catch {}
+}
+if ("speechSynthesis" in window) {
+  pickNavVoice();
+  window.speechSynthesis.onvoiceschanged = pickNavVoice;
+}
 function speak(text) {
   try {
     if (!text || !("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "nl-NL";
+    u.lang = navVoice ? navVoice.lang : "nl-BE";
+    if (navVoice) u.voice = navVoice;
     window.speechSynthesis.speak(u);
   } catch {}
 }
@@ -3767,12 +3814,30 @@ navGoBtn.addEventListener("click", async () => {
     setStatus("— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —", true);
   }
 });
-navStopBtn.addEventListener("click", () => {
+function stopNavigation() {
   navActive = false; navRoute = null;
   navInstruction.textContent = ""; navSub.textContent = "";
   setNavMode("picker");
   renderNavPicker();
-});
+}
+navStopBtn.addEventListener("click", stopNavigation);
+
+// Ring touchpoints (top = GA, bottom = STOP — see markup above). GA
+// starts navigating to whatever's currently shown in the picker, or
+// re-computes the same route if already navigating (e.g. off-route).
+function ringGaPressed() {
+  if (navActive && navRoute) {
+    startNavigationTo(navRoute.destination.label, navRoute.destination.lat, navRoute.destination.lon);
+    return;
+  }
+  const item = getNavPickerList()[navPickerIndex];
+  if (item) startNavigationTo(item.label, item.lat, item.lon);
+  else setStatus("— GEEN BESTEMMING GESELECTEERD —", true);
+}
+const navRingGaEl   = document.getElementById("navRingGa");
+const navRingStopEl = document.getElementById("navRingStop");
+navRingGaEl.addEventListener("click", ringGaPressed);
+navRingStopEl.addEventListener("click", stopNavigation);
 
 function formatDist(m) { return m < 999 ? `${Math.round(m)} M` : `${(m / 1000).toFixed(1)} KM`; }
 function maneuverMainText(type, modifier) {
