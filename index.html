@@ -2022,7 +2022,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0166</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0167</div>
   </footer>
 </div>
 
@@ -2852,6 +2852,12 @@ screen4Btn.addEventListener("click", () => {
   else goToScreen(4);
 });
 try { setScreen4(localStorage.getItem(SCREEN4_KEY) === "1"); } catch { setScreen4(false); }
+
+// Always open the app on Scherm 4, regardless of whatever screen was
+// last active — overrides the restores above. goToScreen() is a plain
+// function declaration defined further down, so it's fully hoisted and
+// safe to call here before that point in the file.
+goToScreen(4);
 
 // Swipe left/right anywhere on the page to cycle through all 4 screens
 // — swipe left (finger moves right-to-left) goes to the next screen
