@@ -1679,6 +1679,20 @@
           <path d="M -6 -8 L 7 0 L -6 8 Z" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round"/>
         </g>
+
+        <!-- New-address touchpoint, on the ring between the left/browse
+             point (9 o'clock) and GA (12 o'clock) — i.e. 10:30, same
+             radius as all the others. Jumps down to the new address
+             search panel in the footer (a keyboard is unavoidable for a
+             genuinely new address — nothing to browse yet). -->
+        <g id="navRingAddNew" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Nieuw adres zoeken" transform="translate(74,74)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M -7 0 L 7 0 M 0 -7 L 0 7" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" transform="translate(0.6,0.6)"/>
+          <path d="M -7 0 L 7 0 M 0 -7 L 0 7" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round"/>
+        </g>
         <g id="navRingStop" class="compass-calib-touch" tabindex="0" role="button"
            aria-label="Stop navigatie" transform="translate(200,378)">
           <circle r="20" fill="rgba(0,0,0,0.001)"/>
@@ -2018,6 +2032,13 @@
     </div>
     <div class="nav-panel">
       <div class="nav-row">
+        <input id="newAddrInput" type="text" placeholder="Naam, adres, of postcode + huisnummer">
+        <button class="btn-vintage btn-small" id="newAddrSearchBtn">ZOEK</button>
+      </div>
+      <div class="nav-sub" id="newAddrResult"></div>
+    </div>
+    <div class="nav-panel">
+      <div class="nav-row">
         <input id="limitTestAddr" type="text" placeholder="Adres om limiet te testen">
         <button class="btn-vintage btn-small" id="limitTestBtn">ZOEK LIMIET</button>
       </div>
@@ -2047,7 +2068,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0168</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0169</div>
   </footer>
 </div>
 
@@ -3814,6 +3835,39 @@ navGoBtn.addEventListener("click", async () => {
     setStatus("— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —", true);
   }
 });
+// New-address search panel — same underlying cache-or-Nominatim flow as
+// the GA field above, just its own clearly-labelled box for looking up
+// a genuinely new destination by name, street address, or postcode +
+// house number (Nominatim's free-text search handles all three).
+const newAddrInput     = document.getElementById("newAddrInput");
+const newAddrSearchBtn = document.getElementById("newAddrSearchBtn");
+const newAddrResult    = document.getElementById("newAddrResult");
+newAddrSearchBtn.addEventListener("click", async () => {
+  const query = newAddrInput.value.trim();
+  if (!query) { newAddrResult.textContent = "— VOER EEN NAAM, ADRES OF POSTCODE + NUMMER IN —"; return; }
+  const cached = getNavPickerList().find(i => navNorm(i.label) === navNorm(query));
+  if (cached) { newAddrResult.textContent = cached.label; await startNavigationTo(cached.label, cached.lat, cached.lon); return; }
+  newAddrResult.textContent = "— ZOEKEN —";
+  try {
+    const dest = await geocodeAddress(query);
+    if (!dest) { newAddrResult.textContent = "— NIET GEVONDEN —"; return; }
+    newAddrResult.textContent = dest.label;
+    await startNavigationTo(dest.label, dest.lat, dest.lon);
+  } catch (e) {
+    newAddrResult.textContent = "— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —";
+  }
+});
+newAddrInput.addEventListener("keydown", (e) => { if (e.key === "Enter") newAddrSearchBtn.click(); });
+
+// Ring touchpoint (10:30, between left/browse and GA — see markup above)
+// jumps down to the new-address panel and focuses it, since typing a
+// genuinely new address needs a keyboard the dial itself doesn't have.
+const navRingAddNewEl = document.getElementById("navRingAddNew");
+navRingAddNewEl.addEventListener("click", () => {
+  newAddrInput.scrollIntoView({ behavior: "smooth", block: "center" });
+  newAddrInput.focus();
+});
+
 function stopNavigation() {
   navActive = false; navRoute = null;
   navInstruction.textContent = ""; navSub.textContent = "";
