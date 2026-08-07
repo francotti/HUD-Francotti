@@ -349,6 +349,11 @@
   .compass-offset-row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:8px;}
   .compass-calib-touch{ cursor:pointer; }
   .compass-calib-touch:active path{ stroke: #ffd83d !important; }
+  /* Destination-picker favorite star: hollow by default, filled orange
+     once the current item is a favorite. Hidden entirely for Huis/Werk
+     (not favoritable — they're already permanent shortcuts). */
+  #navPickerFavStar.fav-on{ fill:#ffb347; }
+  #navPickerFav.fav-hidden{ display:none; }
   .build-stamp{margin-top:10px;font-size:8px;letter-spacing:.42em;color:#3f3f3f;}
 
   .compass-hint{
@@ -1583,21 +1588,80 @@
         <path d="M 74 200 A 126 126 0 0 1 326 200" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
         </g>
 
-        <!-- Maneuver icon, filled in by renderNavGauge() below. -->
-        <g id="navIcon" transform="translate(200,134)" stroke="#4a90e2" stroke-width="6"
-           fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
-        <text id="navMainText" x="200" y="200" text-anchor="middle"
-              font-family="Futura, 'Century Gothic', sans-serif" font-size="30" font-weight="500"
-              fill="#9dccff"></text>
-        <text id="navSubText" x="200" y="225" text-anchor="middle"
-              font-family="Futura, 'Century Gothic', sans-serif" font-size="18.5"
-              fill="#4a90e2"></text>
-        <text id="navDistText" x="200" y="246" text-anchor="middle" letter-spacing="1.5"
-              font-family="Futura, 'Century Gothic', sans-serif" font-size="13.8"
-              fill="#9dccff"></text>
-        <line x1="112" y1="262" x2="288" y2="262" stroke="#1c3350" stroke-width="1"/>
-        <!-- Lane-guidance row, filled in by renderNavGauge() below. -->
-        <g id="navLanes"></g>
+        <!-- Live turn-by-turn readout — hidden while browsing/picking a
+             destination (see #navPicker below), shown once navActive. -->
+        <g id="navLive" style="display:none">
+          <!-- Maneuver icon, filled in by renderNavGauge() below. -->
+          <g id="navIcon" transform="translate(200,134)" stroke="#4a90e2" stroke-width="6"
+             fill="none" stroke-linecap="round" stroke-linejoin="round"></g>
+          <text id="navMainText" x="200" y="200" text-anchor="middle"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="30" font-weight="500"
+                fill="#9dccff"></text>
+          <text id="navSubText" x="200" y="225" text-anchor="middle"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="18.5"
+                fill="#4a90e2"></text>
+          <!-- Distance text: 2x the original size per request (13.8 -> 27.6). -->
+          <text id="navDistText" x="200" y="252" text-anchor="middle" letter-spacing="1.5"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="27.6"
+                fill="#9dccff"></text>
+          <line x1="112" y1="262" x2="288" y2="262" stroke="#1c3350" stroke-width="1"/>
+          <!-- Lane-guidance row, filled in by renderNavGauge() below. -->
+          <g id="navLanes"></g>
+        </g>
+
+        <!-- Destination picker — browsing mode, shown until navActive.
+             Left/right chrome-ring touchpoints (same mechanism as the
+             compass calibration points) cycle through Huis / Werk /
+             Favorieten / Recent; tapping the name itself starts
+             navigating there immediately (no separate confirm step).
+             Tapping the star toggles the current Recent as a Favoriet
+             (max 10) — Huis/Werk aren't favoritable, they're already
+             permanent shortcuts. All of this browses destinations that
+             were already geocoded once and cached (see navStore below),
+             so browsing/selecting here never calls Mapbox by itself —
+             only starting an actual route does (one Directions request). -->
+        <g id="navPicker">
+          <text id="navPickerKind" x="200" y="150" text-anchor="middle" letter-spacing="2"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="11.5"
+                fill="#4a90e2">BESTEMMING</text>
+          <g id="navPickerSelect" style="cursor:pointer">
+            <rect x="110" y="168" width="180" height="66" fill="rgba(0,0,0,0.001)"/>
+            <text id="navPickerLabel" x="200" y="196" text-anchor="middle"
+                  font-family="Futura, 'Century Gothic', sans-serif" font-size="19" font-weight="500"
+                  fill="#9dccff"></text>
+            <text id="navPickerLabel2" x="200" y="217" text-anchor="middle"
+                  font-family="Futura, 'Century Gothic', sans-serif" font-size="13.5"
+                  fill="#9dccff"></text>
+          </g>
+          <text id="navPickerIndex" x="200" y="246" text-anchor="middle" letter-spacing="1"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="11"
+                fill="#2a4258"></text>
+          <text id="navPickerHint" x="200" y="264" text-anchor="middle" letter-spacing="1"
+                font-family="Futura, 'Century Gothic', sans-serif" font-size="9.5"
+                fill="#1c3350">TIK OM TE STARTEN</text>
+          <g id="navPickerFav" class="compass-calib-touch" tabindex="0" role="button"
+             aria-label="Markeer als favoriet" transform="translate(200,282)">
+            <circle r="16" fill="rgba(0,0,0,0.001)"/>
+            <path id="navPickerFavStar" d="M0,-8.5 L2.4,-2.6 8.5,-2.6 3.6,1.1 5.3,7 0,3.5 -5.3,7 -3.6,1.1 -8.5,-2.6 -2.4,-2.6 Z"
+                  fill="none" stroke="#ffb347" stroke-width="1.3"/>
+          </g>
+        </g>
+        <g id="navPickerPrev" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Vorige bestemming" transform="translate(22,200)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M 5 -8 L -6 0 L 5 8" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M 5 -8 L -6 0 L 5 8" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <g id="navPickerNext" class="compass-calib-touch" tabindex="0" role="button"
+           aria-label="Volgende bestemming" transform="translate(378,200)">
+          <circle r="20" fill="rgba(0,0,0,0.001)"/>
+          <path d="M -5 -8 L 6 0 L -5 8" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" transform="translate(0.6,0.6)"/>
+          <path d="M -5 -8 L 6 0 L -5 8" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
       </svg>
     </div>
 
@@ -1958,7 +2022,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-06-0164</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0165</div>
   </footer>
 </div>
 
@@ -3466,10 +3530,20 @@ bigDigitsTestBtn.addEventListener("click", () => {
 });
 
 /* =====================================================================
-   NAVIGATION — Mapbox geocoding + directions (turn-by-turn MVP).
-   Requires a free Mapbox access token, entered once and stored in
-   localStorage. No automatic re-routing yet: if you go off-route,
-   tap GA again with the same destination to recompute.
+   NAVIGATION — Mapbox directions only (turn-by-turn). Destination input
+   happens on the nav dial itself (Huis/Werk/Favorieten/Recent — see the
+   picker below); the text field + GA stays as a fallback for a genuinely
+   new one-off address. Keeping Mapbox requests to a minimum:
+     - Huis and Werk are geocoded once, ever (hand-entered coordinates
+       below), never through any geocoder again.
+     - Every destination that's ever been routed to (recent or favorite)
+       has its lat/lon cached in localStorage, so picking it again from
+       the dial reuses the cached coordinate — no geocoding call at all.
+     - A brand-new typed address is geocoded via the free OpenStreetMap
+       Nominatim endpoint (geocodeAddress(), already used for ZOEK
+       LIMIET) instead of Mapbox's geocoder.
+     - Mapbox's Directions API is the only endpoint still called, and
+       only once per "start navigating" tap — no polling/re-routing.
 ===================================================================== */
 const MAPBOX_KEY_STORAGE = "hud.mapboxToken";
 const navDest = document.getElementById("navDest");
@@ -3490,17 +3564,141 @@ mapboxKeyBtn.addEventListener("click", () => {
   setStatus(input.trim() ? "— MAPBOX TOKEN OPGESLAGEN —" : "— MAPBOX TOKEN GEWIST —");
 });
 
-let navRoute = null;      // { steps: [...], destination: {lat,lon} }
+let navRoute = null;      // { steps: [...], destination: {label,lat,lon} }
 let navActive = false;
 
-async function mapboxGeocode(query, token) {
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&limit=1`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error("Geocoding HTTP " + r.status);
-  const j = await r.json();
-  const hit = j.features && j.features[0];
-  if (!hit) return null;
-  return { lon: hit.center[0], lat: hit.center[1], label: hit.place_name };
+/* ---------------- Destination store: Huis/Werk presets, last 20
+   recents, up to 10 favorites — all persisted in localStorage. Huis and
+   Werk carry hand-entered coordinates so they NEVER need geocoding. --- */
+const NAV_STORE_KEY = "hud.navStore";
+const NAV_RECENTS_MAX = 20;
+const NAV_FAVORITES_MAX = 10;
+
+function loadNavStore() {
+  try {
+    const raw = localStorage.getItem(NAV_STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return {
+    home: { label: "Huis", addr: "Krammerstraat 55, Amsterdam", lat: 52.3457651, lon: 4.8875061 },
+    work: { label: "Werk", addr: "Newtonlaan 247, Utrecht",     lat: 52.0907432, lon: 5.1473266 },
+    recents: [],
+    favorites: []
+  };
+}
+function saveNavStore() { try { localStorage.setItem(NAV_STORE_KEY, JSON.stringify(navStore)); } catch {} }
+let navStore = loadNavStore();
+
+function navNorm(s) { return (s || "").trim().toLowerCase(); }
+
+function addRecentDestination(label, lat, lon) {
+  // Huis/Werk aren't part of the rotating history — they're already
+  // permanent shortcuts.
+  if (navStore.home && navNorm(label) === navNorm(navStore.home.label)) return;
+  if (navStore.work && navNorm(label) === navNorm(navStore.work.label)) return;
+  navStore.recents = navStore.recents.filter(r => navNorm(r.label) !== navNorm(label));
+  navStore.recents.unshift({ label, lat, lon, ts: Date.now() });
+  if (navStore.recents.length > NAV_RECENTS_MAX) navStore.recents.length = NAV_RECENTS_MAX;
+  saveNavStore();
+}
+function isFavorite(label) {
+  return navStore.favorites.some(f => navNorm(f.label) === navNorm(label));
+}
+// Toggles favorite status for a Recent/Favorite item. Returns "added",
+// "removed", or "full" (already at the 10-favorite cap — the caller
+// asks to remove one first rather than silently dropping the oldest).
+function toggleFavorite(item) {
+  const idx = navStore.favorites.findIndex(f => navNorm(f.label) === navNorm(item.label));
+  if (idx >= 0) { navStore.favorites.splice(idx, 1); saveNavStore(); return "removed"; }
+  if (navStore.favorites.length >= NAV_FAVORITES_MAX) return "full";
+  navStore.favorites.unshift({ label: item.label, lat: item.lat, lon: item.lon });
+  saveNavStore();
+  return "added";
+}
+// Combined browse order: Huis, Werk, Favorieten (newest-marked first),
+// then Recent (newest first, minus anything already shown as a Favoriet).
+function getNavPickerList() {
+  const list = [];
+  if (navStore.home) list.push({ kind: "home", label: navStore.home.label, sub: navStore.home.addr, lat: navStore.home.lat, lon: navStore.home.lon });
+  if (navStore.work) list.push({ kind: "work", label: navStore.work.label, sub: navStore.work.addr, lat: navStore.work.lat, lon: navStore.work.lon });
+  navStore.favorites.forEach(f => list.push({ kind: "favorite", label: f.label, sub: "FAVORIET", lat: f.lat, lon: f.lon }));
+  navStore.recents.forEach(r => {
+    if (navStore.favorites.some(f => navNorm(f.label) === navNorm(r.label))) return;
+    list.push({ kind: "recent", label: r.label, sub: "RECENT", lat: r.lat, lon: r.lon });
+  });
+  return list;
+}
+
+/* ---------------- On-dial destination picker (browsing mode) -------- */
+const navLiveEl          = document.getElementById("navLive");
+const navPickerEl        = document.getElementById("navPicker");
+const navPickerKindEl    = document.getElementById("navPickerKind");
+const navPickerLabelEl   = document.getElementById("navPickerLabel");
+const navPickerLabel2El  = document.getElementById("navPickerLabel2");
+const navPickerIndexEl   = document.getElementById("navPickerIndex");
+const navPickerFavEl     = document.getElementById("navPickerFav");
+const navPickerFavStarEl = document.getElementById("navPickerFavStar");
+const navPickerSelectEl  = document.getElementById("navPickerSelect");
+const navPickerPrevEl    = document.getElementById("navPickerPrev");
+const navPickerNextEl    = document.getElementById("navPickerNext");
+const NAV_KIND_LABEL = { home: "HUIS", work: "WERK", favorite: "FAVORIET", recent: "RECENT" };
+let navPickerIndex = 0;
+
+function setNavMode(mode) {
+  const live = mode === "live";
+  navLiveEl.style.display = live ? "" : "none";
+  navPickerEl.style.display = live ? "none" : "";
+  navPickerPrevEl.style.display = live ? "none" : "";
+  navPickerNextEl.style.display = live ? "none" : "";
+}
+
+function renderNavPicker() {
+  const list = getNavPickerList();
+  if (!list.length) {
+    navPickerKindEl.textContent = "BESTEMMING";
+    navPickerLabelEl.textContent = "GEEN BESTEMMINGEN";
+    navPickerLabel2El.textContent = "TYP HIERONDER EEN ADRES";
+    navPickerIndexEl.textContent = "";
+    navPickerFavEl.classList.add("fav-hidden");
+    return;
+  }
+  if (navPickerIndex >= list.length) navPickerIndex = 0;
+  if (navPickerIndex < 0) navPickerIndex = list.length - 1;
+  const item = list[navPickerIndex];
+  navPickerKindEl.textContent = NAV_KIND_LABEL[item.kind] || "BESTEMMING";
+  navPickerLabelEl.textContent = item.label.toUpperCase();
+  navPickerLabel2El.textContent = item.sub || "";
+  navPickerIndexEl.textContent = `${navPickerIndex + 1} / ${list.length}`;
+  const favoritable = item.kind === "recent" || item.kind === "favorite";
+  navPickerFavEl.classList.toggle("fav-hidden", !favoritable);
+  navPickerFavStarEl.classList.toggle("fav-on", item.kind === "favorite");
+}
+renderNavPicker();
+
+navPickerPrevEl.addEventListener("click", () => { navPickerIndex--; renderNavPicker(); });
+navPickerNextEl.addEventListener("click", () => { navPickerIndex++; renderNavPicker(); });
+navPickerSelectEl.addEventListener("click", () => {
+  const item = getNavPickerList()[navPickerIndex];
+  if (item) startNavigationTo(item.label, item.lat, item.lon);
+});
+navPickerFavEl.addEventListener("click", () => {
+  const item = getNavPickerList()[navPickerIndex];
+  if (!item || (item.kind !== "recent" && item.kind !== "favorite")) return;
+  const result = toggleFavorite(item);
+  if (result === "full") { setStatus("— EERST EEN FAVORIET VERWIJDEREN (MAX 10) —", true); return; }
+  const newIdx = getNavPickerList().findIndex(i => navNorm(i.label) === navNorm(item.label));
+  navPickerIndex = newIdx >= 0 ? newIdx : 0;
+  renderNavPicker();
+});
+
+/* ---------------- Spoken turn-by-turn instructions ------------------- */
+function speak(text) {
+  try {
+    if (!text || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "nl-NL";
+    window.speechSynthesis.speak(u);
+  } catch {}
 }
 
 async function mapboxRoute(fromLat, fromLon, toLat, toLon, token) {
@@ -3514,43 +3712,106 @@ async function mapboxRoute(fromLat, fromLon, toLat, toLon, token) {
   const steps = route.legs[0].steps.map(s => ({
     instruction: s.maneuver.instruction,
     location: s.maneuver.location, // [lon, lat]
-    distance: s.distance
+    distance: s.distance,
+    type: s.maneuver.type,
+    modifier: s.maneuver.modifier
   }));
   return { steps, distance: route.distance, duration: route.duration };
 }
 
-navGoBtn.addEventListener("click", async () => {
+// One Mapbox request (Directions only) per navigation start, regardless
+// of whether it was triggered from the dial picker or the text field.
+async function startNavigationTo(label, lat, lon) {
   const token = getMapboxToken();
   if (!token) { setStatus("— EERST MAPBOX KEY INSTELLEN —", true); return; }
-  const query = navDest.value.trim();
-  if (!query) { setStatus("— VOER EEN BESTEMMING IN —", true); return; }
   if (!lastPos) { setStatus("— WACHTEN OP GPS-POSITIE —", true); return; }
   navInstruction.textContent = "— ROUTE BEREKENEN —";
+  setNavMode("live");
   try {
-    const dest = await mapboxGeocode(query, token);
-    if (!dest) { navInstruction.textContent = "— BESTEMMING NIET GEVONDEN —"; return; }
-    const route = await mapboxRoute(lastPos.lat, lastPos.lon, dest.lat, dest.lon, token);
-    if (!route || !route.steps.length) { navInstruction.textContent = "— GEEN ROUTE GEVONDEN —"; return; }
-    navRoute = { steps: route.steps, stepIndex: 0, destination: dest };
+    const route = await mapboxRoute(lastPos.lat, lastPos.lon, lat, lon, token);
+    if (!route || !route.steps.length) { navInstruction.textContent = "— GEEN ROUTE GEVONDEN —"; setNavMode("picker"); return; }
+    navRoute = { steps: route.steps, stepIndex: 0, destination: { label, lat, lon } };
     navActive = true;
     const mins = Math.round(route.duration / 60);
     const km = (route.distance / 1000).toFixed(1);
-    navSub.textContent = `${dest.label} · ${km} KM · ~${mins} MIN`;
-    updateNavInstruction();
+    navSub.textContent = `${label} · ${km} KM · ~${mins} MIN`;
+    addRecentDestination(label, lat, lon);
+    updateNavInstruction(true);
   } catch (e) {
     navInstruction.textContent = "— NAVIGATIEFOUT: " + String(e.message || e).toUpperCase() + " —";
+    setNavMode("picker");
+  }
+}
+
+navGoBtn.addEventListener("click", async () => {
+  const query = navDest.value.trim();
+  if (!query) { setStatus("— VOER EEN BESTEMMING IN —", true); return; }
+  // Reuse a cached coordinate (Huis/Werk/Favoriet/Recent) if the typed
+  // text matches one already geocoded before — zero geocode calls.
+  const cached = getNavPickerList().find(i => navNorm(i.label) === navNorm(query));
+  if (cached) { await startNavigationTo(cached.label, cached.lat, cached.lon); return; }
+  // Otherwise: a genuinely new address, geocoded once via free Nominatim
+  // (not Mapbox) — see geocodeAddress() above.
+  setStatus("— ADRES ZOEKEN —");
+  try {
+    const dest = await geocodeAddress(query);
+    if (!dest) { setStatus("— BESTEMMING NIET GEVONDEN —", true); return; }
+    await startNavigationTo(dest.label, dest.lat, dest.lon);
+  } catch (e) {
+    setStatus("— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —", true);
   }
 });
 navStopBtn.addEventListener("click", () => {
   navActive = false; navRoute = null;
   navInstruction.textContent = ""; navSub.textContent = "";
+  setNavMode("picker");
+  renderNavPicker();
 });
 
-function updateNavInstruction() {
+function formatDist(m) { return m < 999 ? `${Math.round(m)} M` : `${(m / 1000).toFixed(1)} KM`; }
+function maneuverMainText(type, modifier) {
+  const t = type || "turn", m = modifier || "straight";
+  if (t === "arrive") return "AANKOMST";
+  if (t === "roundabout" || t === "rotary" || t === "roundabout turn") return "ROTONDE";
+  if (t === "merge") return "INVOEGEN";
+  if (t === "fork") return "AFSLAG";
+  if (t === "on ramp") return "OPRIT NEMEN";
+  if (t === "off ramp") return "AFRIT NEMEN";
+  if (t === "end of road") return "EINDE WEG";
+  if (t === "depart") return "VERTREK";
+  if (/uturn/.test(m)) return "KEREN";
+  if (/sharp left/.test(m)) return "SCHERP LINKSAF";
+  if (/sharp right/.test(m)) return "SCHERP RECHTSAF";
+  if (/slight left/.test(m)) return "LICHT LINKSAF";
+  if (/slight right/.test(m)) return "LICHT RECHTSAF";
+  if (/left/.test(m)) return "LINKSAF";
+  if (/right/.test(m)) return "RECHTSAF";
+  return "RECHTDOOR";
+}
+
+let lastSpokenStepIndex = -1;
+function updateNavInstruction(announceStart) {
   if (!navRoute) return;
   const step = navRoute.steps[navRoute.stepIndex];
-  if (!step) { navInstruction.textContent = "— AANGEKOMEN —"; navActive = false; return; }
+  if (!step) {
+    navInstruction.textContent = "— AANGEKOMEN —";
+    navActive = false;
+    speak("U bent aangekomen op uw bestemming.");
+    renderNavGauge({ mainText: "AANKOMST", subText: navRoute.destination.label, distText: "", maneuverType: "arrive" });
+    return;
+  }
   navInstruction.textContent = step.instruction;
+  renderNavGauge({
+    mainText: maneuverMainText(step.type, step.modifier),
+    subText: step.instruction,
+    distText: "OVER " + formatDist(step.distance),
+    maneuverType: step.type,
+    maneuverModifier: step.modifier
+  });
+  if (navRoute.stepIndex !== lastSpokenStepIndex || announceStart) {
+    lastSpokenStepIndex = navRoute.stepIndex;
+    speak(step.instruction);
+  }
 }
 function navOnPosition(lat, lon) {
   if (!navActive || !navRoute) return;
@@ -3558,8 +3819,9 @@ function navOnPosition(lat, lon) {
   if (!step) return;
   const [stepLon, stepLat] = step.location;
   const distToManeuver = haversineMeters(lat, lon, stepLat, stepLon);
-  navSub.textContent = navSub.textContent.replace(/^.*?( · )/, distToManeuver < 999
-    ? `${Math.round(distToManeuver)} M$1` : `${(distToManeuver/1000).toFixed(1)} KM$1`);
+  const distStr = formatDist(distToManeuver);
+  navSub.textContent = navSub.textContent.replace(/^.*?( · )/, `${distStr}$1`);
+  navDistTextEl.textContent = "OVER " + distStr;
   if (distToManeuver < 25 && navRoute.stepIndex < navRoute.steps.length - 1) {
     navRoute.stepIndex++;
     updateNavInstruction();
@@ -3660,21 +3922,10 @@ function renderNavGauge(data) {
   }
 }
 
-// Example content so Scherm 4 shows something meaningful right away —
-// swap for real navRoute step data once the look is confirmed.
-renderNavGauge({
-  mainText: "Turn right",
-  subText: "onto A10 afrit 12",
-  distText: "OVER 250 M",
-  maneuverType: "turn",
-  maneuverModifier: "right",
-  lanes: [
-    { active: false, direction: "straight" },
-    { active: true,  direction: "straight" },
-    { active: true,  direction: "right" },
-    { active: false, direction: "right" }
-  ]
-});
+// Real navRoute step data now drives this (see updateNavInstruction()
+// above) — the dial starts on the destination picker instead of demo
+// content; setNavMode()/renderNavPicker() above already put it there.
+setNavMode("picker");
 
 /* ---------------------------------------------------------------------
    Map dial (Scherm 4, second dial): Mapbox Static Images API, north-up,
