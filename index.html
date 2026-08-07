@@ -2068,7 +2068,7 @@
       <span id="compassOffsetValue">+0°</span>
       <button class="btn-vintage btn-small" id="compassOffsetPlus">+90°</button>
     </div>
-    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0169</div>
+    <div class="build-stamp">FRANCOTTI HUD · BUILD 2026-08-07-0170</div>
   </footer>
 </div>
 
@@ -3795,25 +3795,31 @@ async function mapboxRoute(fromLat, fromLon, toLat, toLon, token) {
 
 // One Mapbox request (Directions only) per navigation start, regardless
 // of whether it was triggered from the dial picker or the text field.
+// Returns true/false so callers can show their own "didn't start"
+// feedback next to wherever the user actually tapped — the reasons
+// (no token yet, no GPS fix yet, no route found) all bail out here
+// without starting anything, and previously that only ever showed in
+// the far-away top status line, easy to miss.
 async function startNavigationTo(label, lat, lon) {
   const token = getMapboxToken();
-  if (!token) { setStatus("— EERST MAPBOX KEY INSTELLEN —", true); return; }
-  if (!lastPos) { setStatus("— WACHTEN OP GPS-POSITIE —", true); return; }
+  if (!token) { setStatus("— EERST MAPBOX KEY INSTELLEN —", true); return false; }
+  if (!lastPos) { setStatus("— WACHTEN OP GPS-POSITIE —", true); return false; }
   navInstruction.textContent = "— ROUTE BEREKENEN —";
   setNavMode("live");
   try {
     const route = await mapboxRoute(lastPos.lat, lastPos.lon, lat, lon, token);
-    if (!route || !route.steps.length) { navInstruction.textContent = "— GEEN ROUTE GEVONDEN —"; setNavMode("picker"); return; }
+    if (!route || !route.steps.length) { navInstruction.textContent = "— GEEN ROUTE GEVONDEN —"; setNavMode("picker"); return false; }
     navRoute = { steps: route.steps, stepIndex: 0, destination: { label, lat, lon } };
     navActive = true;
     const mins = Math.round(route.duration / 60);
     const km = (route.distance / 1000).toFixed(1);
     navSub.textContent = `${label} · ${km} KM · ~${mins} MIN`;
-    addRecentDestination(label, lat, lon);
     updateNavInstruction(true);
+    return true;
   } catch (e) {
     navInstruction.textContent = "— NAVIGATIEFOUT: " + String(e.message || e).toUpperCase() + " —";
     setNavMode("picker");
+    return false;
   }
 }
 
@@ -3823,14 +3829,22 @@ navGoBtn.addEventListener("click", async () => {
   // Reuse a cached coordinate (Huis/Werk/Favoriet/Recent) if the typed
   // text matches one already geocoded before — zero geocode calls.
   const cached = getNavPickerList().find(i => navNorm(i.label) === navNorm(query));
-  if (cached) { await startNavigationTo(cached.label, cached.lat, cached.lon); return; }
+  if (cached) {
+    const started = await startNavigationTo(cached.label, cached.lat, cached.lon);
+    if (!started) setStatus("— NAVIGEREN NIET GESTART, ZIE MELDING BOVEN DIAL —", true);
+    return;
+  }
   // Otherwise: a genuinely new address, geocoded once via free Nominatim
-  // (not Mapbox) — see geocodeAddress() above.
+  // (not Mapbox) — see geocodeAddress() above. Saved to Recent as soon as
+  // it's found, regardless of whether the route itself succeeds after.
   setStatus("— ADRES ZOEKEN —");
   try {
     const dest = await geocodeAddress(query);
     if (!dest) { setStatus("— BESTEMMING NIET GEVONDEN —", true); return; }
-    await startNavigationTo(dest.label, dest.lat, dest.lon);
+    addRecentDestination(dest.label, dest.lat, dest.lon);
+    renderNavPicker();
+    const started = await startNavigationTo(dest.label, dest.lat, dest.lon);
+    setStatus(started ? "" : "— NAVIGEREN NIET GESTART, ZIE MELDING BOVEN DIAL —", !started);
   } catch (e) {
     setStatus("— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —", true);
   }
@@ -3846,13 +3860,25 @@ newAddrSearchBtn.addEventListener("click", async () => {
   const query = newAddrInput.value.trim();
   if (!query) { newAddrResult.textContent = "— VOER EEN NAAM, ADRES OF POSTCODE + NUMMER IN —"; return; }
   const cached = getNavPickerList().find(i => navNorm(i.label) === navNorm(query));
-  if (cached) { newAddrResult.textContent = cached.label; await startNavigationTo(cached.label, cached.lat, cached.lon); return; }
+  if (cached) {
+    newAddrResult.textContent = cached.label;
+    const started = await startNavigationTo(cached.label, cached.lat, cached.lon);
+    if (!started) newAddrResult.textContent += " — NIET GESTART, ZIE MELDING BOVEN DIAL";
+    return;
+  }
   newAddrResult.textContent = "— ZOEKEN —";
   try {
     const dest = await geocodeAddress(query);
     if (!dest) { newAddrResult.textContent = "— NIET GEVONDEN —"; return; }
+    // Saved to Recent as soon as it's found, regardless of whether the
+    // route itself succeeds after (missing GPS fix/Mapbox token, etc.)
+    // — that used to be the same bug in both symptoms: neither the
+    // address nor the route would go anywhere if startNavigationTo bailed.
+    addRecentDestination(dest.label, dest.lat, dest.lon);
+    renderNavPicker();
     newAddrResult.textContent = dest.label;
-    await startNavigationTo(dest.label, dest.lat, dest.lon);
+    const started = await startNavigationTo(dest.label, dest.lat, dest.lon);
+    if (!started) newAddrResult.textContent += " — NIET GESTART, ZIE MELDING BOVEN DIAL";
   } catch (e) {
     newAddrResult.textContent = "— ZOEKFOUT: " + String(e.message || e).toUpperCase() + " —";
   }
